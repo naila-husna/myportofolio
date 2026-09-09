@@ -14,11 +14,10 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="#profile" class="brand">Naila</a>
+            <a href="#profile" class="brand">{{ name }}</a>
             <nav>
-                <a href="#profile">Profile</a>
-                <a href="#education">Education</a>
-                <a href="#experience">Experience</a>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
             </nav>
         </div>
     </header>
@@ -28,22 +27,22 @@
             <div class="container hero-grid">
                 <div class="hero-identity">
                     <p class="hero-kicker">Information System&middot; Universitas Indonesia</p>
-                    <h1>Naila Husna Teguh Suasono </h1>
+                    <h1> {{ name }} </h1>
                 </div>
                 <div class="hero-photo">
                     <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of Me!">
+                    <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of {{ name }}!">
                 </div>
                 <div class="hero-details">
-                    <p class="bio">Information System @ UI </p>
+                    <p class="bio"> {{ bio }} </p>
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>2506620444</dd>
+                            <dd>{{ npm }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Information System</dd>
+                            <dd>{{ study_program }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -139,7 +138,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Naila Husna. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
 </body>
