@@ -12,7 +12,7 @@ class Experience(models.Model):
         ('freelance', 'Freelance'),
     ]
     
-    
+      
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
