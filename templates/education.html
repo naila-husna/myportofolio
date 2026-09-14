@@ -23,34 +23,38 @@
         </div>
     </header>
     <main>
-        <section class="page-section experience-section" id="experience">
+        <section class="page-section education-section" id="education">
             <div class="container">
-                <p class="section-kicker">Where I've Learned & Contributed</p>
-                <h1>Experience</h1>
+                <p class="section-kicker">Formal</p>
+                <h1>Education</h1>
 
-                <div class="experience-grid">
-                    {% for experience in experience_list %}
-                    <article class="experience-card">
-                        <span class="experience-category">
-                            {{ experience.get_category_display }}
-                        </span>
-                        <h2>{{ experience.title }}</h2>
-                        <p class="experience-role">
-                            {{experience.role}}
-                        </p>
-                        <p class="experience-description">
-                            {{ experience.description }}
-                        </p>
+                <div class="education-timeline">
+                    {% for education in education_list %}
 
-                        {% if experience.is_ongoing %}
-                        <p class="experience-status">Sedang berlangsung</p>
-                        {% else %}
-                        <p class="experience-status">Selesai</p>
-                        {% endif %}
+                    <article class="education-item">
+                        <span class="timeline-dot"></span>
+
+                        <div class="education-content">
+                            <p class="education-period">
+                                {{ education.start_year }} —
+                                {% if education.end_year %}
+                                {{ education.end_year }}
+                                {% else %}
+                                Present
+                                {% endif %}
+                            </p>
+
+                            <h2>{{ education.institution }}</h2>
+
+                            <p class="education-program">
+                                {{ education.program }}
+                            </p>
+                        </div>
                     </article>
+
                     {% empty %}
                     <p class="empty-state">
-                        Belum ada pengalaman yang ditambahkan.
+                        Belum ada data pendidikan yang ditambahkan.
                     </p>
                     {% endfor %}
                 </div>
