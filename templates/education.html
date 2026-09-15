@@ -1,72 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ name }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=13">
-</head>
+{% block meta %}
+<title>Education - {{ name }}</title>
+{% endblock meta %}
 
-<body>
-    <header class="site-header">
+{% block content %}
+<main>
+    <section class="page-section education-section" id="education">
         <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-            </nav>
-        </div>
-    </header>
-    <main>
-        <section class="page-section education-section" id="education">
-            <div class="container">
-                <p class="section-kicker">Formal</p>
-                <h1>Education</h1>
+            <p class="section-kicker">Formal</p>
+            <h1>Education</h1>
 
-                <div class="education-timeline">
-                    {% for education in education_list %}
+            <div class="education-timeline">
+                {% for education in education_list %}
 
-                    <article class="education-item">
-                        <span class="timeline-dot"></span>
+                <article class="education-item">
+                    <span class="timeline-dot"></span>
 
-                        <div class="education-content">
-                            <p class="education-period">
-                                {{ education.start_year }} —
-                                {% if education.end_year %}
-                                {{ education.end_year }}
-                                {% else %}
-                                Present
-                                {% endif %}
-                            </p>
+                    <div class="education-content">
+                        <p class="education-period">
+                            {{ education.start_year }} —
+                            {% if education.end_year %}
+                            {{ education.end_year }}
+                            {% else %}
+                            Present
+                            {% endif %}
+                        </p>
 
-                            <h2>{{ education.institution }}</h2>
+                        <h2>{{ education.institution }}</h2>
 
-                            <p class="education-program">
-                                {{ education.program }}
-                            </p>
-                        </div>
-                    </article>
+                        <p class="education-program">
+                            {{ education.program }}
+                        </p>
+                    </div>
+                </article>
 
-                    {% empty %}
-                    <p class="empty-state">
-                        Belum ada data pendidikan yang ditambahkan.
-                    </p>
-                    {% endfor %}
-                </div>
+                {% empty %}
+                <p class="empty-state">
+                    Belum ada data pendidikan yang ditambahkan.
+                </p>
+                {% endfor %}
             </div>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
-    </footer>
-</body>
-
-</html>
+    </section>
+</main>
+{% endblock content %}

@@ -1,67 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block meta %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naila Husna - Portofolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=11">
-</head>
+<title>Naila Husna - Portofolio</title>
 
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-            </nav>
-        </div>
-    </header>
+{% endblock meta %}
 
-    <main>
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Information System&middot; Universitas Indonesia</p>
-                    <h1> {{ name }} </h1>
-                </div>
-                <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of {{ name }}!">
-                </div>
-                <div class="hero-details">
-                    <p class="bio"> {{ bio }} </p>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
-                        </div>
-                    </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/naila-husna" class="social-link">GitHub</a>
-                        <a href="https://linkedin.com/nhusnats" class="social-link">LinkedIn</a>
-                        <a href="mailto: naila.husna@ui.ac.id" class="social-link">Email</a>
+{% block content %}
+<main>
+    <section class="hero" id="profile">
+        <div class="container hero-grid">
+            <div class="hero-identity">
+                <p class="hero-kicker">Information System&middot; Universitas Indonesia</p>
+                <h1> {{ name }} </h1>
+            </div>
+
+            <div class="hero-photo">
+                <div class="photo-block"></div>
+                <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of {{ name }}!">
+            </div>
+
+            <div class="hero-details">
+                <p class="bio"> {{ bio }} </p>
+
+                <dl class="meta-list">
+                    <div class="meta-row">
+                        <dt>NPM</dt>
+                        <dd>{{ npm }}</dd>
                     </div>
+
+                    <div class="meta-row">
+                        <dt>Program</dt>
+                        <dd>{{ study_program }}</dd>
+                    </div>
+                </dl>
+
+                <div class="social-links">
+                    <a href="https://github.com/naila-husna" class="social-link">GitHub</a>
+                    <a href="https://linkedin.com/nhusnats" class="social-link">LinkedIn</a>
+                    <a href="mailto:naila.husna@ui.ac.id" class="social-link">Email</a>
                 </div>
             </div>
-        </section>
-
-    </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
-    </footer>
-</body>
+    </section>
 
-</html>
+</main>
+{% endblock content %}
