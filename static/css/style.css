@@ -11,7 +11,7 @@
     --accent-dark: #46542d;
     --line: #cfc9b8;
     --text-muted: #666451;
-    ;
+    --green-bg: #8c8c50;
     --radius: 4px;
 }
 
@@ -34,8 +34,8 @@ h1,
 }
 
 .site-header {
-    background-color: #8c8c50;
-    border-bottom: 1px solid #8c8c50;
+    background-color: var(--green-bg);
+    border-bottom: 1px solid var(--green-bg);
 }
 
 .site-header .container {
@@ -48,7 +48,7 @@ h1,
 .brand {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #faf6f0;
+    color: var(--paper);
     text-decoration: none;
 }
 
@@ -58,7 +58,7 @@ h1,
 }
 
 .site-header nav a {
-    color: #faf6f0;
+    color: var(--paper);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 700;
@@ -69,7 +69,7 @@ h1,
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #8c8c50;
+    background-color: var(--green-bg);
 }
 
 .hero-grid {
@@ -80,14 +80,14 @@ h1,
         "details photo";
     gap: 1.5rem 3rem;
 
-    background-color: #f8f1e5;
+    background-color: var(--paper);
     padding: 3rem;
 
     max-width: 1050px;
     width: calc(100% - 3rem);
     margin: 0 auto;
 
-    border: 1px solid #d8cfbd;
+    border: 1px solid var(--line);
 }
 
 .hero-identity {
@@ -102,8 +102,7 @@ h1,
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #46542d;
-    ;
+    color: var(--accent-dark);
     font-weight: 700;
     margin-bottom: 0.75rem;
 }
@@ -148,15 +147,15 @@ h1,
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    color: #faf6f0;
-    background-color: #5f6f3d;
+    color: var(--paper);
+    background-color: var(--green-bg);
     border-radius: var(--radius);
     padding: 0.5rem 1.1rem;
     transition: background-color 0.2s ease;
 }
 
 .social-link:hover {
-    background-color: var(--accent);
+    background-color: var(--green-bg);
 }
 
 .hero-photo {
@@ -172,21 +171,20 @@ h1,
 }
 
 .site-footer {
-    background-color: #8c8c50;
+    background-color: var(--green-bg);
     padding: 1.5rem;
-    color: #faf6f0;
+    color: var(--paper);
     font-size: 0.85rem;
-    border-top: 1px solid #8c8c50;
+    border-top: 1px solid var(--green-bg);
 }
 
 .section-kicker {
     color: var(--accent-dark);
-    font-size: 0.65;
+    font-size: 0.65rem;
     font-weight: 650;
     text-transform: uppercase;
     margin-bottom: 0.4rem;
-    margin-bottom: 0.4rem;
-    letter-spacing: 0.08 rem;
+    letter-spacing: 0.08rem;
 }
 
 .experience-section h1 {
@@ -201,6 +199,8 @@ h1,
 }
 
 .experience-card {
+    display: flex;
+    flex-direction: column;
     padding: 1.25rem;
     background-color: #fff;
     border: 1px solid var(--line);
@@ -235,6 +235,20 @@ h1,
     margin-top: 1rem;
     font-size: 0.85rem;
     font-weight: 600;
+}
+
+.button {
+    display: inline-block;
+    height: fit-content;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
 }
 
 body {
@@ -319,168 +333,6 @@ main {
     font-weight: 600;
 }
 
-.experience-form {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 1.5rem;
-
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-weight: 700;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.7rem;
-    border: 1px solid var(--accent);
-    border-radius: var(--radius);
-    font: inherit;
-    background-color: white;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    outline: 2px solid var(--accent);
-    border-color: var(--accent);
-}
-
-.form-error {
-    color: #b42318;
-    font-size: 0.85rem;
-    margin-top: 0.35rem;
-}
-
-.button {
-    display: inline-block;
-    height: fit-content;
-    border: 0;
-    border-radius: var(--radius);
-    padding: 0.65rem 1rem;
-    background: var(--accent);
-    color: white;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.form-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.form-actions .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 0.7rem 1.25rem;
-    line-height: 1;
-}
-
-.button-secondary {
-    background: var(--ink);
-}
-
-.button-danger {
-    background: #b42318;
-}
-
-.button-danger:hover {
-    background: #8f1c13;
-}
-
-.experience-delete-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    margin: 0;
-    padding: 1rem;
-    border: 0;
-    background: transparent;
-    z-index: 10;
-    align-items: center;
-    justify-content: center;
-}
-
-.experience-delete-modal:popover-open {
-    display: flex;
-}
-
-.experience-delete-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    padding: 0;
-    background: rgba(28, 25, 23, 0.58);
-    cursor: default;
-}
-
-.experience-delete-modal__content {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 480px);
-    padding: 1.5rem;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(28, 25, 23, 0.22);
-}
-
-.experience-delete-modal__content h2 {
-    margin: 0 0 0.75rem;
-    font-family: "Space Grotesk", -apple-system, sans-serif;
-    font-size: 1.5rem;
-}
-
-.experience-delete-modal__content p {
-    color: var(--text-muted);
-}
-
-.experience-delete-modal__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    border: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 1.8rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.experience-delete-modal__actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-}
-
-.experience-delete-modal__actions form {
-    margin: 0;
-}
 
 .experience-header {
     display: flex;
@@ -492,14 +344,6 @@ main {
 
 .experience-header h1 {
     margin: 0;
-}
-
-.experience-add-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    white-space: nowrap;
 }
 
 .experience-search {
@@ -532,13 +376,141 @@ main {
     justify-content: center;
 }
 
-.experience-card {
+.experience-card .experience-description {
+    margin-bottom: 0.5rem;
+}
+
+.messages {
+    padding: 3rem 0 4rem;
+    background-color: var(--green-bg);
+}
+
+.message-list {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 1.5rem 2rem;
+    width: 100%;
+    margin-bottom: 4rem;
+}
+
+.message-list h2 {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 2.5rem;
+    color: var(--paper);
+}
+
+.message-list h3 {
+    grid-column: 1;
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--ink);
+    align-self: start;
+}
+
+.message-card {
+    min-height: 280px;
+    padding: 1.75rem;
+    background-color: #f8f1e5;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
 }
 
-.experience-card .experience-description {
-    margin-bottom: 0.5rem;
+.message-card h4 {
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.message-card p {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    flex: 1;
+}
+
+.message-card small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.message-grid {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.message-form {
+    width: 100%;
+}
+
+.message-form h2 {
+    margin-bottom: 0.3rem;
+    font-size: 2.5rem;
+    color: var(--paper);
+}
+
+.message-form h3 {
+    margin: 0 0 0.8rem;
+    font-size: 1.2rem;
+    color: var(--ink);
+}
+
+.message-form form {
+    width: 100%;
+    max-width: 500px;
+}
+
+.message-form form p {
+    margin-bottom: 1rem;
+}
+
+.message-form form label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+    color: var(--paper);
+}
+
+.message-form form input,
+.message-form form textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: white;
+    color: var(--ink);
+    font: inherit;
+}
+
+.message-form form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.message-form form input:focus,
+.message-form form textarea:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+}
+
+.message-form form button {
+    display: inline-block;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.65rem 1rem;
+    background: var(--accent-dark);
+    color: var(--paper);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.message-form form button:hover {
+    background: var(--accent);
 }
 
 @media (max-width: 600px) {
@@ -558,44 +530,9 @@ main {
         justify-content: flex-start;
     }
 
-    .form-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-actions .button {
-        width: 100%;
-        text-align: center;
-    }
-
-    .experience-delete-modal {
-        align-items: flex-end;
-        padding: 0;
-    }
-
-    .experience-delete-modal__content {
-        width: 100%;
-        padding: 1.25rem;
-        border-radius: var(--radius) var(--radius) 0 0;
-    }
-
-    .experience-delete-modal__actions {
-        flex-direction: column-reverse;
-    }
-
-    .experience-delete-modal__actions .button {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-    }
-
     .experience-header {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .experience-add-button {
-        width: 100%;
     }
 
     .experience-search {

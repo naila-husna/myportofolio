@@ -43,5 +43,42 @@
         </div>
     </section>
 
+    <section class="messages" id="messages">
+        <div class="container">
+
+            <div class="message-list">
+
+                <h2>What they said about me</h2>
+                <h3>A collection of messages from friends and teammates</h3>
+
+                <div class="message-grid">
+                    {% for message in message_list %}
+                    <div class="message-card">
+                        <h4>{{ message.name }}</h4>
+                        <p>{{ message.message }}</p>
+                        <small>{{ message.created_at }}</small>
+                    </div>
+                    {% empty %}
+                    <p>Belum ada pesan.</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="message-form">
+                <h2>Add your own message!</h2>
+                <h3>Leave a message, thought, or encouragement for me</h3>
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {{ form.as_p }}
+
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+
 </main>
 {% endblock content %}

@@ -1,8 +1,6 @@
 from django.forms import (ModelForm, TextInput, Textarea, URLInput, DateInput)
 
-from main.models import Experience
-
-from main.models import Experience
+from main.models import Experience, Message
 
 
 class ExperienceForm(ModelForm):
@@ -54,6 +52,35 @@ class ExperienceForm(ModelForm):
             "ended_at": DateInput(
                 attrs={
                     "type": "date",
+                }
+            ),
+        }
+        
+class MessageForm(ModelForm):
+    class Meta:
+        model = Message
+
+        fields = [
+            "name",
+            "message",
+        ]
+
+        labels = {
+            "name": "Nama",
+            "message": "Pesan",
+        }
+
+        widgets = {
+            "name": TextInput(
+                attrs={
+                    "placeholder": "Nama kamu",
+                    "maxlength": 100,
+                }
+            ),
+            "message": Textarea(
+                attrs={
+                    "placeholder": "Tulis pesan atau kata-kata untuk Naila...",
+                    "rows": 4,
                 }
             ),
         }
