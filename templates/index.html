@@ -53,11 +53,32 @@
 
                 <div class="message-grid">
                     {% for message in message_list %}
+
                     <div class="message-card">
-                        <h4>{{ message.name }}</h4>
+                        {% if message.is_anonymous %}
+                        <h3>Anonymous</h3>
+                        {% else %}
+                        <h3>{{ message.name }}</h3>
+                        {% endif %}
+
+                        <p>{{ message.relationship }}</p>
                         <p>{{ message.message }}</p>
                         <small>{{ message.created_at }}</small>
+
+                        <div class="message-actions">
+                            <a href="{% url 'main:update_message' message.pk %}">
+                                Edit
+                            </a>
+
+                            <form method="POST" action="{% url 'main:delete_message' message.pk %}">
+                                {% csrf_token %}
+                                <button type="submit">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
+
                     {% empty %}
                     <p>Belum ada pesan.</p>
                     {% endfor %}

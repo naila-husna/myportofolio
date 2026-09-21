@@ -40,7 +40,9 @@ class Education(models.Model):
 
 class Message(models.Model):
     name = models.CharField(max_length=100)
+    relationship = models.CharField(max_length=100)
     message = models.TextField()
+    is_anonymous = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
