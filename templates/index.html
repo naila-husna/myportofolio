@@ -52,6 +52,7 @@
                 <h3>A collection of messages from friends and teammates</h3>
 
                 <div class="message-grid">
+
                     {% for message in message_list %}
 
                     <div class="message-card">
@@ -61,18 +62,26 @@
                         <h3>{{ message.name }}</h3>
                         {% endif %}
 
-                        <p>{{ message.relationship }}</p>
-                        <p>{{ message.message }}</p>
-                        <small>{{ message.created_at }}</small>
+                        <p class="message-relationship">
+                            {{ message.relationship }}
+                        </p>
+
+                        <p class="message-text">
+                            {{ message.message }}
+                        </p>
+
+                        <small class="message-date">
+                            {{ message.created_at }}
+                        </small>
 
                         <div class="message-actions">
-                            <a href="{% url 'main:update_message' message.pk %}">
+                            <a href="{% url 'main:update_message' message.pk %}" class="button">
                                 Edit
                             </a>
 
                             <form method="POST" action="{% url 'main:delete_message' message.pk %}">
                                 {% csrf_token %}
-                                <button type="submit">
+                                <button type="submit" class="button button-danger">
                                     Delete
                                 </button>
                             </form>
@@ -80,8 +89,11 @@
                     </div>
 
                     {% empty %}
+
                     <p>Belum ada pesan.</p>
+
                     {% endfor %}
+
                 </div>
 
             </div>

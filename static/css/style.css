@@ -411,27 +411,41 @@ main {
 .message-card {
     min-height: 280px;
     padding: 1.75rem;
-    background-color: #f8f1e5;
+    background-color: var(--paper);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
 }
 
-.message-card h4 {
-    margin-bottom: 0.75rem;
-    font-size: 1.2rem;
+.message-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    color: var(--ink);
 }
 
 .message-card p {
-    margin-bottom: 1rem;
     color: var(--text-muted);
     font-size: 1rem;
     line-height: 1.6;
+}
+
+.message-card .message-relationship {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.message-card .message-text {
     flex: 1;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
 }
 
 .message-card small {
+    display: block;
+    margin-bottom: 0.75rem;
     color: var(--text-muted);
     font-size: 0.8rem;
 }
@@ -475,7 +489,7 @@ main {
     color: var(--paper);
 }
 
-.message-form form input,
+.message-form form input:not([type="checkbox"]),
 .message-form form textarea {
     width: 100%;
     padding: 0.7rem 0.9rem;
@@ -511,6 +525,80 @@ main {
 
 .message-form form button:hover {
     background: var(--accent);
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+}
+
+.message-actions form {
+    margin: 0;
+}
+
+.message-actions .button {
+    min-width: auto;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.message-actions .button-danger {
+    background-color: #a33a32;
+    border-color: #a33a32;
+    color: var(--paper);
+}
+
+.message-actions .button-danger:hover {
+    background-color: #7f2d27;
+    border-color: #7f2d27;
+    color: var(--paper);
+}
+
+.message-actions .button-outline {
+    background-color: #9b3a32;
+    color: var(--paper);
+    border: 1px solid #9b3a32;
+}
+
+.message-actions .button-outline:hover {
+    background-color: #7d2f29;
+    border-color: #7d2f29;
+}
+
+.button-outline {
+    background-color: transparent;
+    color: var(--accent-dark);
+    border: 1px solid var(--accent-dark);
+}
+
+.button-outline:hover {
+    background-color: var(--accent-dark);
+    color: var(--paper);
+}
+
+.message-form form p:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 1.25rem 0;
+}
+
+.message-form form p:has(input[type="checkbox"]) label {
+    margin: 0;
+    color: var(--paper);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.message-form form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent-dark);
+    cursor: pointer;
 }
 
 @media (max-width: 600px) {
