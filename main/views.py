@@ -9,6 +9,7 @@ from main.forms import MessageForm
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.views import redirect_to_login
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -28,6 +29,12 @@ def get_messages_json(request):
     )
     
 def show_main(request):
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path(), login_url="/login/")
+        if not request.user.is_superuser:
+            raise PermissionDenied
+
     last_login = request.COOKIES.get('last_login', 'Belum ada sesi login / Cookie tidak ditemukan')
     
     form = MessageForm(request.POST or None)
@@ -49,12 +56,13 @@ def show_main(request):
         "last_login": last_login,
         "form": form,
         "message_list": messages_list,
+        "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "index.html", context)
 
 @login_required(login_url="/login/")
 def update_message(request, message_id):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or request.user.groups.filter(name="Editor").exists()):
         raise PermissionDenied
     
     message = get_object_or_404(Message, pk=message_id)
@@ -76,7 +84,7 @@ def update_message(request, message_id):
 @login_required(login_url="/login/")
 def delete_message(request, message_id):
     if not request.user.is_superuser:
-            raise PermissionDenied
+        raise PermissionDenied
     
     message = get_object_or_404(Message, pk=message_id)
 

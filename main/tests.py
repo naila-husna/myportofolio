@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 from django.test import TestCase
 from django.urls import reverse
@@ -95,6 +96,102 @@ class EducationTest(TestCase):
             "Belum ada data pendidikan yang ditambahkan."
         )
         
+class MessageAuthorizationTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="reader")
+        self.editor = User.objects.create_user(username="editor")
+        self.editor.groups.add(Group.objects.create(name="Editor"))
+        self.owner = User.objects.create_user(username="owner", is_superuser=True)
+        self.message = Message.objects.create(
+            name="Alya",
+            relationship="Friend",
+            message="Semangat terus!",
+        )
+        self.message_data = {
+            "name": "Alya",
+            "relationship": "Friend",
+            "message": "Pesan baru.",
+        }
+        self.main_url = reverse("main:show_main")
+        self.edit_url = reverse("main:update_message", args=[self.message.pk])
+        self.delete_url = reverse("main:delete_message", args=[self.message.pk])
+
+    def test_public_page_and_controls_follow_each_role(self):
+        for user, can_edit, can_create_delete in [
+            (None, False, False),
+            (self.user, False, False),
+            (self.editor, True, False),
+            (self.owner, True, True),
+        ]:
+            with self.subTest(user=user):
+                self.client.logout()
+                if user:
+                    self.client.force_login(user)
+
+                response = self.client.get(self.main_url)
+
+                self.assertContains(response, self.message.message)
+                self.assertEqual(f'href="{self.edit_url}"' in response.text, can_edit)
+                self.assertEqual(f'action="{self.delete_url}"' in response.text, can_create_delete)
+                self.assertEqual('class="message-form"' in response.text, can_create_delete)
+
+    def test_guest_writes_redirect_to_login_without_changing_data(self):
+        for url in [self.main_url, self.edit_url, self.delete_url]:
+            with self.subTest(url=url):
+                response = self.client.post(url, self.message_data)
+
+                self.assertRedirects(response, f'{reverse("main:login")}?next={url}')
+                self.assertEqual(Message.objects.count(), 1)
+                self.message.refresh_from_db()
+                self.assertEqual(self.message.message, "Semangat terus!")
+
+    def test_regular_user_cannot_create_edit_or_delete(self):
+        self.client.force_login(self.user)
+
+        for url in [self.main_url, self.edit_url, self.delete_url]:
+            with self.subTest(url=url):
+                response = self.client.post(url, self.message_data)
+
+                self.assertEqual(response.status_code, 403)
+                self.assertEqual(Message.objects.count(), 1)
+                self.message.refresh_from_db()
+                self.assertEqual(self.message.message, "Semangat terus!")
+
+        self.assertEqual(self.client.get(self.edit_url).status_code, 403)
+
+    def test_editor_can_edit_but_cannot_create_or_delete(self):
+        self.client.force_login(self.editor)
+        self.assertEqual(self.client.get(self.edit_url).status_code, 200)
+
+        response = self.client.post(self.edit_url, self.message_data)
+
+        self.assertRedirects(response, self.main_url)
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.message, "Pesan baru.")
+
+        for url in [self.main_url, self.delete_url]:
+            with self.subTest(url=url):
+                self.assertEqual(self.client.post(url, self.message_data).status_code, 403)
+                self.assertEqual(Message.objects.count(), 1)
+
+    def test_owner_can_create_edit_and_delete(self):
+        self.client.force_login(self.owner)
+
+        self.assertRedirects(self.client.post(self.main_url, self.message_data), self.main_url)
+        self.assertEqual(Message.objects.count(), 2)
+        self.assertRedirects(self.client.post(self.edit_url, self.message_data), self.main_url)
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.message, "Pesan baru.")
+        self.assertRedirects(self.client.post(self.delete_url), self.main_url)
+        self.assertFalse(Message.objects.filter(pk=self.message.pk).exists())
+
+    def test_get_does_not_delete_message(self):
+        self.client.force_login(self.owner)
+
+        self.assertRedirects(self.client.get(self.delete_url), self.main_url)
+        self.assertTrue(Message.objects.filter(pk=self.message.pk).exists())
+
+
 class MessageStarTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
