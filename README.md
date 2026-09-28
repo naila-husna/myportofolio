@@ -57,6 +57,19 @@ Log chat: https://chatgpt.com/share/6ab13cbb-8250-83ec-872b-11061ef41662
 ## Tugas 4
 MyPortofolio adalah website portofolio pribadi berbasis Django yang menampilkan profil, pendidikan, pengalaman, dan pesan. Website ini menyediakan registrasi, login, fitur star, serta pembagian akses untuk admin, editor, dan pengguna biasa.
 
+Username & Password
+__Akun Biasa__
+usn: nailahusna
+pass: naila101
+
+__Akun Admin__
+usn: admin
+pass: naila101
+
+__Akun Editor__
+usn: editor
+pass: pbpgong
+
 Untuk menjalankan proyek di Windows, siapkan Python 3.12 dan Git, lalu ikuti langkah berikut melalui PowerShell.
 
 1. Clone repositori dan masuk ke folder proyek.
