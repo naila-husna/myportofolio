@@ -59,7 +59,11 @@
                     {% for message in message_list %}
                     <div class="message-card">
 
+                        {% if message.is_anonymous %}
+                        <h3>Anonymous</h3>
+                        {% else %}
                         <h3>{{ message.name }}</h3>
+                        {% endif %}
                         <p>{{ message.message }}</p>
 
                         {% include "components/message_star.html" with message=message %}

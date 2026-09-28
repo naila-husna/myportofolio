@@ -3,7 +3,7 @@ import json
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -241,6 +241,10 @@ class MessageStarTest(TestCase):
                 pk=self.user.pk
             ).exists()
         )
+        self.assertEqual(self.message.starred_by.count(), 1)
+        page = self.client.get(reverse("main:show_main"))
+        self.assertContains(page, 'class="button button-star is-starred"')
+        self.assertContains(page, '<span class="star-count">1</span>', html=True)
 
     def test_logged_in_user_can_unstar_message(self):
         self.message.starred_by.add(self.user)
@@ -264,8 +268,70 @@ class MessageStarTest(TestCase):
                 pk=self.user.pk
             ).exists()
         )
+        self.assertEqual(self.message.starred_by.count(), 0)
+        page = self.client.get(reverse("main:show_main"))
+        self.assertNotContains(page, 'class="button button-star is-starred"')
+        self.assertContains(page, '<span class="star-count">0</span>', html=True)
+
+    def test_get_does_not_change_stars(self):
+        self.client.force_login(self.user)
+
+        for already_starred in [False, True]:
+            with self.subTest(already_starred=already_starred):
+                if already_starred:
+                    self.message.starred_by.add(self.user)
+
+                response = self.client.get(reverse("main:toggle_star", args=[self.message.pk]))
+
+                self.assertRedirects(response, reverse("main:show_main"))
+                self.assertEqual(self.message.starred_by.filter(pk=self.user.pk).exists(), already_starred)
+
+    def test_users_can_only_toggle_their_own_star(self):
+        other_user = User.objects.create_user(username="visitor")
+        self.message.starred_by.add(other_user)
+        self.client.force_login(self.user)
+        star_url = reverse("main:toggle_star", args=[self.message.pk])
+
+        for expected_count in [2, 1, 2]:
+            with self.subTest(expected_count=expected_count):
+                self.assertRedirects(self.client.post(star_url), reverse("main:show_main"))
+                self.assertEqual(self.message.starred_by.count(), expected_count)
+                self.assertTrue(self.message.starred_by.filter(pk=other_user.pk).exists())
+
+    def test_star_requires_valid_csrf_token(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.user)
+        page = client.get(reverse("main:show_main"))
+        self.assertContains(page, 'name="csrfmiddlewaretoken"')
+        star_url = reverse("main:toggle_star", args=[self.message.pk])
+
+        self.assertEqual(client.post(star_url).status_code, 403)
+        self.assertEqual(self.message.starred_by.count(), 0)
+
+        response = client.post(star_url, {
+            "csrfmiddlewaretoken": client.cookies["csrftoken"].value,
+        })
+
+        self.assertRedirects(response, reverse("main:show_main"))
+        self.assertEqual(self.message.starred_by.count(), 1)
+
+    def test_editor_and_owner_can_toggle_stars(self):
+        editor = User.objects.create_user(username="editor")
+        editor.groups.add(Group.objects.create(name="Editor"))
+        owner = User.objects.create_user(username="owner", is_superuser=True)
+        star_url = reverse("main:toggle_star", args=[self.message.pk])
+
+        for user in [editor, owner]:
+            with self.subTest(user=user):
+                self.client.force_login(user)
+                self.assertRedirects(self.client.post(star_url), reverse("main:show_main"))
+                self.assertTrue(self.message.starred_by.filter(pk=user.pk).exists())
+                self.assertRedirects(self.client.post(star_url), reverse("main:show_main"))
+                self.assertFalse(self.message.starred_by.filter(pk=user.pk).exists())
 
     def test_json_uses_username_for_starred_by(self):
+        self.user.email = "naila@example.com"
+        self.user.save(update_fields=["email"])
         self.message.starred_by.add(self.user)
 
         response = self.client.get(
@@ -284,3 +350,35 @@ class MessageStarTest(TestCase):
             message_data["fields"]["starred_by"],
             [["nailahusna"]]
         )
+        self.assertEqual(message_data["fields"]["name"], self.message.name)
+        self.assertNotContains(response, self.user.email)
+        self.assertNotContains(response, self.user.password)
+
+    def test_anonymous_name_is_hidden_on_public_page(self):
+        self.message.is_anonymous = True
+        self.message.save(update_fields=["is_anonymous"])
+
+        for user in [None, self.user]:
+            with self.subTest(user=user):
+                self.client.logout()
+                if user:
+                    self.client.force_login(user)
+
+                response = self.client.get(reverse("main:show_main"))
+
+                self.assertContains(response, "<h3>Anonymous</h3>", html=True)
+                self.assertNotContains(response, self.message.name)
+
+    def test_anonymous_name_is_hidden_in_json_without_changing_database(self):
+        self.message.is_anonymous = True
+        self.message.save(update_fields=["is_anonymous"])
+
+        response = self.client.get(reverse("main:get_messages_json"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/json")
+        message_data = next(item for item in response.json() if item["pk"] == self.message.pk)
+        self.assertEqual(message_data["fields"]["name"], "Anonymous")
+        self.assertNotContains(response, self.message.name)
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.name, "Alya")
