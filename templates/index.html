@@ -64,19 +64,21 @@
                         {% else %}
                         <h3>{{ message.name }}</h3>
                         {% endif %}
-                        <p>{{ message.message }}</p>
+                        <p class="message-text">{{ message.message }}</p>
 
-                        {% include "components/message_star.html" with message=message %}
+                        <div class="message-actions">
+                            {% include "components/message_star.html" with message=message %}
 
-                        {% if user.is_superuser or is_editor %}
-                        <a href="{% url 'main:update_message' message.id %}" class="button">
-                            Edit
-                        </a>
-                        {% endif %}
+                            {% if user.is_superuser or is_editor %}
+                            <a href="{% url 'main:update_message' message.id %}" class="button">
+                                Edit
+                            </a>
+                            {% endif %}
 
-                        {% if user.is_superuser %}
-                        {% include "components/message_delete_modal.html" with message=message %}
-                        {% endif %}
+                            {% if user.is_superuser %}
+                            {% include "components/message_delete_modal.html" with message=message %}
+                            {% endif %}
+                        </div>
 
                     </div>
                     {% empty %}
@@ -98,7 +100,7 @@
 
                     {{ form.as_p }}
 
-                    <button type="submit">Send Message</button>
+                    <button type="submit" class="button">Send Message</button>
                 </form>
             </div>
             {% endif %}

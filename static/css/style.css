@@ -9,6 +9,8 @@
     --paper: #faf6f0;
     --accent: #5f6f3d;
     --accent-dark: #46542d;
+    --danger: #a33a32;
+    --danger-dark: #7f2d27;
     --line: #cfc9b8;
     --text-muted: #666451;
     --green-bg: #8c8c50;
@@ -16,10 +18,17 @@
 }
 
 body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ink);
     background-color: var(--paper);
     line-height: 1.6;
+}
+
+main {
+    flex: 1;
 }
 
 h1,
@@ -54,7 +63,14 @@ h1,
 
 .site-header nav {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 2rem;
+}
+
+.nav-user {
+    color: var(--paper);
+    font-weight: 600;
 }
 
 .site-header nav a {
@@ -238,8 +254,10 @@ h1,
 }
 
 .button {
-    display: inline-block;
-    height: fit-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
     border: 0;
     border-radius: var(--radius);
     padding: 0.65rem 1rem;
@@ -248,23 +266,42 @@ h1,
     cursor: pointer;
     font: inherit;
     font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
     text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+.button:hover {
+    background-color: var(--accent-dark);
 }
 
-main {
-    flex: 1;
+.button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
 }
 
-.page-section {
-    padding: 3rem 0 4rem;
+.button-danger {
+    background-color: var(--danger);
+    color: white;
 }
 
+.button-danger:hover {
+    background-color: var(--danger-dark);
+}
+
+.button-secondary {
+    border: 1px solid var(--line);
+    background-color: var(--paper);
+    color: var(--ink);
+}
+
+.button-secondary:hover {
+    background-color: var(--line);
+}
+
+.page-section,
+.experience-section,
 .education-section {
     padding: 3rem 0 4rem;
 }
@@ -333,7 +370,6 @@ main {
     font-weight: 600;
 }
 
-
 .experience-header {
     display: flex;
     align-items: center;
@@ -386,31 +422,33 @@ main {
 }
 
 .message-list {
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    gap: 1.5rem 2rem;
     width: 100%;
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
 }
 
-.message-list h2 {
-    grid-column: 1 / -1;
+.message-list > h2 {
     margin: 0;
     font-size: 2.5rem;
     color: var(--paper);
 }
 
-.message-list h3 {
-    grid-column: 1;
-    margin: 0;
-    font-size: 1.2rem;
+.message-list > h3 {
+    margin: 0.5rem 0 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 400;
     color: var(--ink);
-    align-self: start;
+}
+
+.message-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
 }
 
 .message-card {
-    min-height: 280px;
-    padding: 1.75rem;
+    min-width: 0;
+    min-height: 220px;
+    padding: 1.5rem;
     background-color: var(--paper);
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -441,6 +479,8 @@ main {
     flex: 1;
     margin-bottom: 1.25rem;
     color: var(--ink);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 .message-card small {
@@ -450,45 +490,92 @@ main {
     font-size: 0.8rem;
 }
 
-.message-grid {
-    grid-column: 2;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+.message-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.message-actions form {
+    margin: 0;
+}
+
+.message-actions .button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+.message-delete {
+    display: inline-flex;
 }
 
 .message-form {
     width: 100%;
+    padding: 2rem;
+    background-color: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
 }
 
 .message-form h2 {
     margin-bottom: 0.3rem;
-    font-size: 2.5rem;
-    color: var(--paper);
-}
-
-.message-form h3 {
-    margin: 0 0 0.8rem;
-    font-size: 1.2rem;
+    font-size: 2rem;
     color: var(--ink);
 }
 
+.message-form h3 {
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
 .message-form form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
     width: 100%;
-    max-width: 500px;
 }
 
 .message-form form p {
-    margin-bottom: 1rem;
+    min-width: 0;
+    margin: 0;
 }
 
+.message-form form p:has(textarea),
+.message-form form p:has(input[type="checkbox"]) {
+    grid-column: 1 / -1;
+}
+
+.project-form {
+    max-width: 640px;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: white;
+}
+
+.project-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.project-form > .button {
+    margin: 0 0.5rem 0.5rem 0;
+}
+
+.project-form label,
 .message-form form label {
     display: block;
     margin-bottom: 0.35rem;
     font-weight: 700;
-    color: var(--paper);
+    color: var(--ink);
 }
 
+.project-form input:not([type="checkbox"]),
+.project-form textarea,
 .message-form form input:not([type="checkbox"]),
 .message-form form textarea {
     width: 100%;
@@ -500,11 +587,14 @@ main {
     font: inherit;
 }
 
+.project-form textarea,
 .message-form form textarea {
-    min-height: 100px;
+    min-height: 130px;
     resize: vertical;
 }
 
+.project-form input:focus,
+.project-form textarea:focus,
 .message-form form input:focus,
 .message-form form textarea:focus {
     outline: 2px solid var(--accent);
@@ -512,60 +602,129 @@ main {
 }
 
 .message-form form button {
-    display: inline-block;
-    border: 0;
-    border-radius: var(--radius);
-    padding: 0.65rem 1rem;
+    grid-column: 1 / -1;
+    justify-self: start;
     background: var(--accent-dark);
-    color: var(--paper);
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
 }
 
 .message-form form button:hover {
     background: var(--accent);
 }
 
-.message-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.8rem;
+.form-error,
+.message-form .errorlist {
+    grid-column: 1 / -1;
+    color: var(--danger);
+    font-size: 0.875rem;
 }
 
-.message-actions form {
+.form-help {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.form-help ul,
+.message-form .errorlist {
+    padding-left: 1.25rem;
+}
+
+.login-page {
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.5rem;
+    background-color: var(--green-bg);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    box-shadow: 0 12px 32px rgba(28, 25, 23, 0.1);
+}
+
+.login-header {
+    margin-bottom: 1.5rem;
+}
+
+.login-header .login-kicker {
+    margin-bottom: 0.5rem;
+    color: var(--accent-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.login-header h1 {
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    line-height: 1.15;
+}
+
+.login-header > p:last-child {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.project-form.login-form {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+}
+
+.login-form input {
+    min-height: 48px;
+}
+
+.login-form > .button {
+    width: 100%;
+    min-height: 48px;
     margin: 0;
 }
 
-.message-actions .button {
-    min-width: auto;
-    padding: 0.4rem 0.7rem;
-    font-size: 0.75rem;
-    line-height: 1.2;
+.login-form .form-error {
+    margin-top: 0.35rem;
 }
 
-.message-actions .button-danger {
-    background-color: #a33a32;
-    border-color: #a33a32;
-    color: var(--paper);
+.login-notice,
+.login-error {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    background-color: #edf0e6;
+    color: var(--accent-dark);
+    font-size: 0.875rem;
 }
 
-.message-actions .button-danger:hover {
-    background-color: #7f2d27;
-    border-color: #7f2d27;
-    color: var(--paper);
+.login-error {
+    border-color: var(--danger);
+    background-color: #f8e9e6;
+    color: var(--danger);
 }
 
-.message-actions .button-outline {
-    background-color: #9b3a32;
-    color: var(--paper);
-    border: 1px solid #9b3a32;
+.login-register {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
 }
 
-.message-actions .button-outline:hover {
-    background-color: #7d2f29;
-    border-color: #7d2f29;
+.login-register a {
+    color: var(--accent-dark);
+    font-weight: 700;
+    text-underline-offset: 3px;
+}
+
+.login-register a:hover {
+    color: var(--ink);
 }
 
 .button-outline {
@@ -579,26 +738,74 @@ main {
     color: var(--paper);
 }
 
+.project-form .form-group:has(input[type="checkbox"]),
 .message-form form p:has(input[type="checkbox"]) {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    margin: 1.25rem 0;
 }
 
+.project-form .form-group:has(input[type="checkbox"]) label,
 .message-form form p:has(input[type="checkbox"]) label {
     margin: 0;
-    color: var(--paper);
+    color: var(--ink);
     font-size: 0.95rem;
     font-weight: 700;
 }
 
+.project-form input[type="checkbox"],
 .message-form form input[type="checkbox"] {
     width: 18px;
     height: 18px;
     margin: 0;
     accent-color: var(--accent-dark);
     cursor: pointer;
+}
+
+.project-form input[type="checkbox"],
+.message-form form input[type="checkbox"] {
+    order: -1;
+    flex-shrink: 0;
+}
+
+.project-delete-modal {
+    position: fixed;
+    inset: 0;
+    width: min(440px, calc(100% - 2rem));
+    height: fit-content;
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 1.75rem;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 20px 50px rgba(28, 25, 23, 0.2);
+}
+
+.project-delete-modal::backdrop {
+    background-color: rgba(28, 25, 23, 0.4);
+}
+
+.project-delete-modal h2 {
+    font-size: 1.5rem;
+}
+
+.project-delete-modal p {
+    margin: 0.75rem 0 1.5rem;
+    color: var(--text-muted);
+}
+
+.project-delete-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.project-delete-modal__actions form {
+    margin: 0;
 }
 
 .star-form {
@@ -612,8 +819,16 @@ main {
     background: var(--ink);
 }
 
+.button-star:hover {
+    background-color: #39332e;
+}
+
 .button-star.is-starred {
     background: var(--accent);
+}
+
+.button-star.is-starred:hover {
+    background-color: var(--accent-dark);
 }
 
 .star-count {
@@ -624,12 +839,28 @@ main {
 }
 
 @media (max-width: 600px) {
+    .site-header .container {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .site-header nav {
+        gap: 0.5rem 1rem;
+    }
+
+    .hero {
+        padding: 2rem 1.5rem;
+    }
+
     .hero-grid {
         grid-template-columns: 1fr;
         grid-template-areas:
             "identity"
             "photo"
             "details";
+        gap: 1.5rem;
+        width: 100%;
+        padding: 1.5rem;
     }
 
     .hero-photo {
@@ -638,6 +869,11 @@ main {
 
     .social-links {
         justify-content: flex-start;
+    }
+
+    .meta-list {
+        flex-direction: column;
+        gap: 1rem;
     }
 
     .experience-header {
@@ -651,5 +887,25 @@ main {
 
     .experience-search .button {
         width: 100%;
+    }
+
+    .message-grid,
+    .message-form form {
+        grid-template-columns: 1fr;
+    }
+
+    .message-list > h2,
+    .message-form h2 {
+        font-size: 2rem;
+    }
+
+    .message-card,
+    .message-form,
+    .project-form {
+        padding: 1.25rem;
+    }
+
+    .login-card {
+        padding: 1.75rem 1.5rem;
     }
 }
