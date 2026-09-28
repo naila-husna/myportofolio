@@ -1,6 +1,6 @@
 from django.urls import path
 
-from main.views import show_main, show_experience, show_education, get_messages_json, update_message, delete_message
+from main.views import show_main, show_experience, show_education, get_messages_json, update_message, delete_message, register, login_user, logout_user, toggle_star
 
 app_name = "main"
 
@@ -11,4 +11,8 @@ urlpatterns = [
     path("api/messages/", get_messages_json, name="get_messages_json"),
     path("messages/<int:message_id>/edit/", update_message, name="update_message"),
     path("messages/<int:message_id>/delete/", delete_message, name="delete_message"),
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+    path("messages/<int:message_id>/star/", toggle_star, name="toggle_star",),
 ]

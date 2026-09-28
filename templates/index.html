@@ -27,10 +27,13 @@
                         <dt>NPM</dt>
                         <dd>{{ npm }}</dd>
                     </div>
-
                     <div class="meta-row">
                         <dt>Program</dt>
                         <dd>{{ study_program }}</dd>
+                    </div>
+                    <div class="meta-row">
+                        <dt>Sesi Terakhir Login</dt>
+                        <dd>{{ last_login }}</dd>
                     </div>
                 </dl>
 
@@ -54,40 +57,22 @@
                 <div class="message-grid">
 
                     {% for message in message_list %}
-
                     <div class="message-card">
-                        {% if message.is_anonymous %}
-                        <h3>Anonymous</h3>
-                        {% else %}
+
                         <h3>{{ message.name }}</h3>
+                        <p>{{ message.message }}</p>
+
+                        {% include "components/message_star.html" with message=message %}
+
+                        {% if user.is_superuser %}
+                        <a href="{% url 'main:update_message' message.id %}" class="button">
+                            Edit
+                        </a>
+
+                        {% include "components/message_delete_modal.html" with message=message %}
                         {% endif %}
 
-                        <p class="message-relationship">
-                            {{ message.relationship }}
-                        </p>
-
-                        <p class="message-text">
-                            {{ message.message }}
-                        </p>
-
-                        <small class="message-date">
-                            {{ message.created_at }}
-                        </small>
-
-                        <div class="message-actions">
-                            <a href="{% url 'main:update_message' message.pk %}" class="button">
-                                Edit
-                            </a>
-
-                            <form method="POST" action="{% url 'main:delete_message' message.pk %}">
-                                {% csrf_token %}
-                                <button type="submit" class="button button-danger">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
                     </div>
-
                     {% empty %}
 
                     <p>Belum ada pesan.</p>
