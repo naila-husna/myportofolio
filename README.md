@@ -53,3 +53,65 @@ Log chat: https://chatgpt.com/share/6aa7a5db-62a8-83ec-97ba-e2a7c440fd0d
 Dalam pengerjaan Tugas 3, saya menggunakan ChatGPT terutama untuk membantu memahami konsep yang belum saya pahami secara penuh dan sebagai bantuan saat melakukan troubleshooting. Saya berdiskusi mengenai alasan data perlu melalui proses serialization dan deserialization serta memahami bahwa tujuan utamanya bukan sekadar membuat data menjadi lebih compact, melainkan mengubah object menjadi format yang dapat dikirim atau dipertukarkan dan kemudian dikembalikan menjadi object yang dapat digunakan oleh aplikasi. Saya juga menggunakan AI untuk mendiskusikan fitur anonymous pada bagian Message, khususnya mengenai perbedaan antara hanya menyembunyikan nama pada tampilan dan memastikan nama tersebut juga tidak terekspos melalui data JSON. Selain itu, saya menggunakan AI untuk mencari kemungkinan penyebab ketika perubahan CSS tidak muncul pada halaman, seperti cache browser, selector yang tidak sesuai, atau file CSS yang tidak terbaca. Saran yang diberikan AI tetap saya sesuaikan kembali dengan struktur dan kebutuhan portofolio saya sebelum diterapkan.
 
 Log chat: https://chatgpt.com/share/6ab13cbb-8250-83ec-872b-11061ef41662 
+
+## Tugas 4
+MyPortofolio adalah website portofolio pribadi berbasis Django yang menampilkan profil, pendidikan, pengalaman, dan pesan. Website ini menyediakan registrasi, login, fitur star, serta pembagian akses untuk admin, editor, dan pengguna biasa.
+
+Untuk menjalankan proyek di Windows, siapkan Python 3.12 dan Git, lalu ikuti langkah berikut melalui PowerShell.
+
+1. Clone repositori dan masuk ke folder proyek.
+   git clone https://github.com/naila-husna/myportofolio.git
+   cd myportofolio
+
+2. Buat virtual environment.
+   py -3.12 -m venv env
+
+3. Install dependensi proyek.
+   .\env\Scripts\python.exe -m pip install -r requirements.txt
+
+4. Gunakan database lokal dan jalankan migrasi di terminal yang sama.
+   $env:PRODUCTION = "False"
+   .\env\Scripts\python.exe manage.py migrate
+
+5. Buat akun admin.
+   .\env\Scripts\python.exe manage.py createsuperuser
+
+   Isi username, email, dan password sesuai petunjuk terminal. Karakter password tidak akan terlihat saat diketik.
+
+6. Jalankan server pengembangan.
+   .\env\Scripts\python.exe manage.py runserver
+
+7. Buka website melalui browser.
+   http://127.0.0.1:8000/
+
+   Halaman yang tersedia:
+   - /register/ untuk membuat akun biasa.
+   - /login/ untuk masuk ke akun.
+   - /admin/ untuk mengelola pengguna dan grup menggunakan akun admin.
+   Pengguna biasa dapat memberikan atau membatalkan star. Admin dapat menambah, mengedit, dan menghapus pesan.
+
+8. Siapkan akun editor jika diperlukan.
+   Daftarkan akun biasa, lalu masuk ke Django Admin. Buat grup bernama persis Editor. Buka pengaturan akun yang ingin dijadikan editor, pindahkan grup tersebut ke bagian Chosen groups, lalu simpan.
+
+   Pastikan akun aktif, tetapi Staff status dan Superuser status tidak dicentang. Akun editor dapat login melalui /login/ untuk mengedit pesan.
+
+9. Hentikan server dengan menekan Ctrl + C.
+   Untuk menjalankannya kembali, buka PowerShell di folder proyek dan jalankan:
+
+   powershell
+   $env:PRODUCTION = "False"
+   .\env\Scripts\python.exe manage.py runserver
+Database lokal menggunakan SQLite. Akun dan data dari komputer pembuat proyek tidak otomatis ikut saat clone, sehingga perlu dibuat kembali pada instalasi baru.
+
+### Penggunaan AI
+Saya menggunakan ChatGPT sebagai alat bantu untuk memahami konsep dan mendiskusikan pembagian hak akses pada website portofolio. Bagian yang dibantu AI meliputi:
+
+1. Pemahaman cache Python. Saya menanyakan mengapa cache Python dapat muncul kembali setelah dihapus. ChatGPT menjelaskan proses pembentukan cache secara otomatis, perbedaan __pycache__, cache pip, dan .pytest_cache, serta cara mencegah penulisan cache bytecode saat menjalankan program.
+
+2. Pemahaman ketentuan tugas. Saya memberikan dokumen Tugas 4 dan Tutorial 4 sebagai referensi untuk mendiskusikan ketentuan autentikasi dan otorisasi, terutama perbedaan hak akses pengguna biasa, editor, dan pemilik portofolio.
+
+3. Perancangan peran editor dan admin. Saya mendiskusikan pembagian akses yang sesuai dengan fitur pesan pada portofolio, lalu memperjelas bahwa pesan tersebut berbentuk review atau testimoni dari pengunjung. Diskusi mencakup kewenangan membaca, mengedit, menambah, dan menghapus pesan, serta memberikan atau membatalkan star.
+
+4. Evaluasi rancangan hak akses. Saya mengusulkan agar editor dapat membaca dan mengedit pesan serta memberikan atau membatalkan star, tetapi tidak dapat menambah atau menghapus pesan maupun masuk ke Django Admin. Admin memiliki seluruh kemampuan editor, ditambah akses untuk menambah dan menghapus pesan, mengakses Django Admin, mengelola akun, dan menentukan pengguna yang menjadi editor. ChatGPT membantu mengevaluasi kesesuaian rancangan tersebut dengan ketentuan tugas.
+
+5. Pertimbangan penerapan dan integritas data. ChatGPT menjelaskan perlunya pemeriksaan hak akses di sisi server selain menyembunyikan tombol pada tampilan, penggunaan grup Editor, serta pembatasan akses Django Admin. Kami juga membahas dampak pengeditan terhadap keaslian review dan potensi ketidaksesuaian antara fitur pengiriman review oleh pengguna biasa dengan ketentuan pembuatan data portofolio dalam tugas.
