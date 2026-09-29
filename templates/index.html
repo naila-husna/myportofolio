@@ -54,48 +54,43 @@
                 <h2>What they said about me</h2>
                 <h3>A collection of messages from friends and teammates</h3>
 
-                <div class="message-grid">
-
-                    {% for message in message_list %}
-                    <div class="message-card">
-
-                        {% if message.is_anonymous %}
-                        <h3>Anonymous</h3>
-                        {% else %}
-                        <h3>{{ message.name }}</h3>
-                        {% endif %}
-                        <p class="message-text">{{ message.message }}</p>
-
-                        <div class="message-actions">
-                            {% include "components/message_star.html" with message=message %}
-
-                            {% if user.is_superuser or is_editor %}
-                            <a href="{% url 'main:update_message' message.id %}" class="button">
-                                Edit
-                            </a>
-                            {% endif %}
-
-                            {% if user.is_superuser %}
-                            {% include "components/message_delete_modal.html" with message=message %}
-                            {% endif %}
-                        </div>
-
-                    </div>
-                    {% empty %}
-
-                    <p>Belum ada pesan.</p>
-
-                    {% endfor %}
-
+                <div class="message-toolbar">
+                    <form id="message-search-form" role="search">
+                        <input type="search" id="search-input" name="message" value="{{ message_query }}"
+                            placeholder="Cari berdasarkan isi pesan" aria-label="Cari berdasarkan isi pesan">
+                        <button type="submit" class="button">Cari</button>
+                    </form>
+                    {% if user.is_superuser %}
+                    <button type="button" class="button button-secondary" popovertarget="message-modal">
+                        + Tambah Pesan
+                    </button>
+                    {% endif %}
                 </div>
 
-            </div>
+                <div id="loading" class="empty-state hide">
+                    <p>Memuat pesan...</p>
+                </div>
 
+                <div id="error" class="empty-state hide">
+                    <p>Gagal memuat pesan. Silakan coba lagi.</p>
+                </div>
+
+                <div id="empty" class="empty-state hide">
+                    <p>Belum ada pesan yang ditambahkan atau ditemukan.</p>
+                </div>
+
+                <div id="grid" class="message-grid hide"></div>
+
+            </div>
             {% if user.is_superuser %}
-            <div class="message-form">
-                <h2>Add your own message!</h2>
+
+            <div id="message-modal" class="message-form message-form-modal" popover="auto"
+                role="dialog" aria-modal="true" aria-labelledby="message-modal-title">
+                <button type="button" class="message-form-modal__close" popovertarget="message-modal"
+                    popovertargetaction="hide" aria-label="Tutup form">&times;</button>
+                <h2 id="message-modal-title">Add your own message!</h2>
                 <h3>Leave a message, thought, or encouragement for me</h3>
-                <form method="POST">
+                <form id="message-form" method="POST" action="{% url 'main:show_main' %}">
                     {% csrf_token %}
 
                     {{ form.as_p }}
@@ -109,4 +104,201 @@
     </section>
 
 </main>
+
+
+<script>
+    // Konfigurasi
+    const BASE_MESSAGES_ENDPOINT = "{% url 'main:get_messages_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+    let messagesAbortController;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('message-search-form');
+    const searchInput = document.getElementById('search-input');
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+    const CREATE_MESSAGE_ENDPOINT = "{% url 'main:create_message_ajax' %}";
+    const messageForm = document.getElementById('message-form');
+    const messageModal = document.getElementById('message-modal');
+
+    // Menyembunyikan/Menampilkan section halaman
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // Membuat elemen card project
+    function buildMessageCardElement(item) {
+        const message = item.fields;
+        const messageId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'message-card';
+
+        // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
+        const deleteUrl = "{% url 'main:delete_message' 0 %}".replace('/0/', `/${messageId}/`);
+
+        const starUrl = "{% url 'main:toggle_star' 0 %}".replace('/0/', `/${messageId}/`);
+        const editUrl = "{% url 'main:update_message' 0 %}".replace('/0/', `/${messageId}/`);
+
+        const editHtml = IS_SUPERUSER || IS_EDITOR? `<a href="${editUrl}" class="button">Edit</a>` : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<form method="post" action="${deleteUrl}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="button button-danger" onclick="return confirm('Yakin ingin menghapus message ini?');">Hapus</button>
+            </form>`
+            : '';
+
+        const isStarredClass = message.is_starred ? " is-starred" : "";
+        const starText = message.is_starred ? "Unstar" : "Star";
+        const starTitle = message.star_count > 0
+            ? `Dibintangi oleh ${message.starred_by_names}`
+            : "Jadilah yang pertama memberi star";
+
+        // Komponen card
+        const completeCardHtml = `
+            <h3>${escapeHtml(message.name)}</h3>
+            <p class="message-text">${escapeHtml(message.message)}</p>
+            <div class="message-card-actions">
+                <div class="message-actions">
+                    
+                    <form method="post" action="${starUrl}" class="star-form">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="button button-star${isStarredClass}"
+                                title="${escapeHtml(starTitle)}">
+                            <span aria-hidden="true">★</span>
+                            ${starText}
+                            <span class="star-count">${escapeHtml(message.star_count)}</span>
+                        </button>
+                    </form>
+                    
+                    ${editHtml}
+                    ${deleteHtml}
+                </div>
+            </div>
+        `;
+
+        articleElement.innerHTML = completeCardHtml;
+        return articleElement;
+    }
+
+    // Fetch data project
+    async function fetchMessages(searchQuery = "") {
+        if (messagesAbortController) messagesAbortController.abort();
+        messagesAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery ? `${BASE_MESSAGES_ENDPOINT}?message=${encodeURIComponent(searchQuery)}` : BASE_MESSAGES_ENDPOINT;
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: messagesAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const messageData = await response.json();
+
+            if (messageData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                messageData.forEach(item => {
+                    gridContainer.appendChild(buildMessageCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading Message:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    function searchMessages() {
+        fetchMessages(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(searchMessages, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    // Event Handlers untuk Form Search
+    searchForm.addEventListener('submit', function (e) {
+        e.preventDefault(); // Mencegah reload halaman
+        clearTimeout(searchDebounceTimer);
+        searchMessages();
+    });
+
+    function closeMessageModal() {
+        if (messageModal && messageModal.matches(':popover-open')) {
+            messageModal.hidePopover();
+        }
+    }
+
+    async function addMessage(event) {
+        event.preventDefault();
+        const submitButton = messageForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_MESSAGE_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': messageForm.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+                body: new FormData(messageForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                messageForm.reset();
+                closeMessageModal();
+                showToast('Berhasil', 'Pesan baru berhasil ditambahkan!', 'success');
+                clearTimeout(searchDebounceTimer);
+                searchMessages();
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                showToast('Gagal menambahkan pesan', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding message:', error);
+            showToast('Gagal menambahkan pesan', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (messageForm) {
+        messageForm.addEventListener('submit', addMessage);
+        if ("{{ form.errors|yesno:'true,false' }}" === "true") {
+            messageModal.showPopover();
+        }
+    }
+
+    // Start application
+    fetchMessages(searchInput.value.trim());
+</script>
 {% endblock content %}

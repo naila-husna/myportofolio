@@ -2,7 +2,7 @@ import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from main.models import Experience, Education, Message
 from main.forms import MessageForm
@@ -13,20 +13,35 @@ from django.contrib.auth.views import redirect_to_login
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 
 def get_messages_json(request):
-    messages = Message.objects.all().order_by("-created_at")
+    message_query = request.GET.get("message", "").strip()
+    messages = Message.objects.prefetch_related("starred_by").order_by("-created_at")
 
+    if message_query:
+        messages = messages.filter(message__icontains=message_query)
+
+    data = []
     for message in messages:
-        if message.is_anonymous:
-            message.name = "Anonymous"
+        starred_users = message.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
 
-    messages_json = serializers.serialize("json", messages, use_natural_foreign_keys=True)
+        data.append({
+            "pk": str(message.id),
+            "fields": {
+                "name": "Anonymous" if message.is_anonymous else message.name,
+                "relationship": message.relationship,
+                "message": message.message,
+                "is_anonymous": message.is_anonymous,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
 
-    return HttpResponse(
-        messages_json,
-        content_type="application/json"
-    )
+    return JsonResponse(data, safe=False)
     
 def show_main(request):
     if request.method == "POST":
@@ -43,7 +58,7 @@ def show_main(request):
         form.save()
         return redirect("main:show_main")
     
-    messages_list = Message.objects.all().order_by("-created_at")
+    message_query = request.GET.get("message", "").strip()
     
     context = {
         "name": "Naila Husna",
@@ -55,10 +70,28 @@ def show_main(request):
         ),
         "last_login": last_login,
         "form": form,
-        "message_list": messages_list,
         "is_editor": request.user.groups.filter(name="Editor").exists(),
+        "message_query": message_query,
     }
     return render(request, "index.html", context)
+
+@require_POST
+def create_message_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan pesan."},
+            status=403,
+        )
+
+    form = MessageForm(request.POST)
+    if form.is_valid():
+        message = form.save()
+        return JsonResponse(
+            {"message": "Pesan berhasil ditambahkan.", "pk": str(message.id)},
+            status=201,
+        )
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
 
 @login_required(login_url="/login/")
 def update_message(request, message_id):
