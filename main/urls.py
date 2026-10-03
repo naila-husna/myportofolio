@@ -1,7 +1,17 @@
 from django.urls import path
-from main.views import create_message_ajax
-
-from main.views import show_main, show_experience, show_education, get_messages_json, update_message, delete_message, register, login_user, logout_user, toggle_star
+from main.views import (
+    create_message_ajax,
+    show_main,
+    show_experience,
+    show_education,
+    get_messages_json,
+    update_message,
+    delete_message,
+    register,
+    login_user,
+    logout_user,
+    toggle_star,
+)
 
 app_name = "main"
 

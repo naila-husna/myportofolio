@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
@@ -116,12 +114,12 @@ class MessageAuthorizationTest(TestCase):
         self.edit_url = reverse("main:update_message", args=[self.message.pk])
         self.delete_url = reverse("main:delete_message", args=[self.message.pk])
 
-    def test_public_page_and_controls_follow_each_role(self):
-        for user, can_edit, can_create_delete in [
+    def test_public_page_shell_and_create_form_follow_each_role(self):
+        for user, is_editor, can_create in [
             (None, False, False),
             (self.user, False, False),
             (self.editor, True, False),
-            (self.owner, True, True),
+            (self.owner, False, True),
         ]:
             with self.subTest(user=user):
                 self.client.logout()
@@ -130,10 +128,15 @@ class MessageAuthorizationTest(TestCase):
 
                 response = self.client.get(self.main_url)
 
-                self.assertContains(response, self.message.message)
-                self.assertEqual(f'href="{self.edit_url}"' in response.text, can_edit)
-                self.assertEqual(f'action="{self.delete_url}"' in response.text, can_create_delete)
-                self.assertEqual('class="message-form"' in response.text, can_create_delete)
+                self.assertContains(response, '<div id="grid" class="message-grid hide"></div>', html=True)
+                self.assertNotContains(response, self.message.message)
+                self.assertEqual(response.context["is_editor"], is_editor)
+                self.assertEqual('id="message-form"' in response.text, can_create)
+                self.assertEqual('id="message-modal"' in response.text, can_create)
+
+                data_response = self.client.get(reverse("main:get_messages_json"))
+                self.assertEqual(data_response.status_code, 200)
+                self.assertEqual(data_response.json()[0]["fields"]["message"], self.message.message)
 
     def test_guest_writes_redirect_to_login_without_changing_data(self):
         for url in [self.main_url, self.edit_url, self.delete_url]:
@@ -242,9 +245,10 @@ class MessageStarTest(TestCase):
             ).exists()
         )
         self.assertEqual(self.message.starred_by.count(), 1)
-        page = self.client.get(reverse("main:show_main"))
-        self.assertContains(page, 'class="button button-star is-starred"')
-        self.assertContains(page, '<span class="star-count">1</span>', html=True)
+        response = self.client.get(reverse("main:get_messages_json"))
+        fields = response.json()[0]["fields"]
+        self.assertIs(fields["is_starred"], True)
+        self.assertEqual(fields["star_count"], 1)
 
     def test_logged_in_user_can_unstar_message(self):
         self.message.starred_by.add(self.user)
@@ -269,9 +273,10 @@ class MessageStarTest(TestCase):
             ).exists()
         )
         self.assertEqual(self.message.starred_by.count(), 0)
-        page = self.client.get(reverse("main:show_main"))
-        self.assertNotContains(page, 'class="button button-star is-starred"')
-        self.assertContains(page, '<span class="star-count">0</span>', html=True)
+        response = self.client.get(reverse("main:get_messages_json"))
+        fields = response.json()[0]["fields"]
+        self.assertIs(fields["is_starred"], False)
+        self.assertEqual(fields["star_count"], 0)
 
     def test_get_does_not_change_stars(self):
         self.client.force_login(self.user)
@@ -338,23 +343,23 @@ class MessageStarTest(TestCase):
             reverse("main:get_messages_json")
         )
 
-        data = json.loads(response.content)
+        data = response.json()
 
         message_data = next(
             item
             for item in data
-            if item["pk"] == self.message.pk
+            if item["pk"] == str(self.message.pk)
         )
 
         self.assertEqual(
-            message_data["fields"]["starred_by"],
-            [["nailahusna"]]
+            message_data["fields"]["starred_by_names"],
+            "nailahusna"
         )
         self.assertEqual(message_data["fields"]["name"], self.message.name)
         self.assertNotContains(response, self.user.email)
         self.assertNotContains(response, self.user.password)
 
-    def test_anonymous_name_is_hidden_on_public_page(self):
+    def test_anonymous_name_is_hidden_for_guests_and_logged_in_users(self):
         self.message.is_anonymous = True
         self.message.save(update_fields=["is_anonymous"])
 
@@ -366,8 +371,11 @@ class MessageStarTest(TestCase):
 
                 response = self.client.get(reverse("main:show_main"))
 
-                self.assertContains(response, "<h3>Anonymous</h3>", html=True)
                 self.assertNotContains(response, self.message.name)
+
+                data_response = self.client.get(reverse("main:get_messages_json"))
+                self.assertEqual(data_response.json()[0]["fields"]["name"], "Anonymous")
+                self.assertNotContains(data_response, self.message.name)
 
     def test_anonymous_name_is_hidden_in_json_without_changing_database(self):
         self.message.is_anonymous = True
@@ -377,8 +385,195 @@ class MessageStarTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
-        message_data = next(item for item in response.json() if item["pk"] == self.message.pk)
+        message_data = next(item for item in response.json() if item["pk"] == str(self.message.pk))
         self.assertEqual(message_data["fields"]["name"], "Anonymous")
         self.assertNotContains(response, self.message.name)
         self.message.refresh_from_db()
         self.assertEqual(self.message.name, "Alya")
+
+
+class MessageAjaxTest(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(username="owner", is_superuser=True)
+        self.user = User.objects.create_user(username="reader")
+        self.editor = User.objects.create_user(username="editor")
+        self.editor.groups.add(Group.objects.create(name="Editor"))
+        self.list_url = reverse("main:get_messages_json")
+        self.create_url = reverse("main:create_message_ajax")
+        self.message_data = {
+            "name": "Alya",
+            "relationship": "Friend",
+            "message": "Semangat terus!",
+        }
+        self.message = Message.objects.create(**self.message_data)
+
+    def test_json_includes_message_fields_and_current_users_star_status(self):
+        self.message.starred_by.add(self.user)
+
+        for user, is_starred in [(None, False), (self.user, True), (self.editor, False)]:
+            with self.subTest(user=user):
+                self.client.logout()
+                if user:
+                    self.client.force_login(user)
+
+                response = self.client.get(self.list_url)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response["Content-Type"], "application/json")
+                self.assertEqual(response.json(), [{
+                    "pk": str(self.message.pk),
+                    "fields": {
+                        **self.message_data,
+                        "is_anonymous": False,
+                        "star_count": 1,
+                        "is_starred": is_starred,
+                        "starred_by_names": self.user.username,
+                    },
+                }])
+
+    def test_search_matches_message_case_insensitively_and_trims_spaces(self):
+        Message.objects.create(name="Semangat", relationship="Friend", message="Terima kasih.")
+
+        response = self.client.get(self.list_url, {"message": "  SEMANGAT  "})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item["pk"] for item in response.json()], [str(self.message.pk)])
+
+    def test_blank_search_returns_all_messages_newest_first(self):
+        Message.objects.filter(pk=self.message.pk).update(
+            created_at=timezone.now() - timezone.timedelta(days=1)
+        )
+        newer_message = Message.objects.create(
+            name="Budi", relationship="Teammate", message="Terima kasih."
+        )
+
+        for params in [{}, {"message": "   "}]:
+            with self.subTest(params=params):
+                response = self.client.get(self.list_url, params)
+                self.assertEqual(
+                    [item["pk"] for item in response.json()],
+                    [str(newer_message.pk), str(self.message.pk)],
+                )
+
+    def test_no_search_matches_and_empty_database_return_empty_list(self):
+        response = self.client.get(self.list_url, {"message": "tidak ditemukan"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+        Message.objects.all().delete()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_only_owner_can_create_messages_via_ajax(self):
+        for user in [None, self.user, self.editor]:
+            with self.subTest(user=user):
+                self.client.logout()
+                if user:
+                    self.client.force_login(user)
+
+                response = self.client.post(self.create_url, self.message_data)
+
+                self.assertEqual(response.status_code, 403)
+                self.assertEqual(response["Content-Type"], "application/json")
+                self.assertTrue(response.json()["message"])
+                self.assertEqual(Message.objects.count(), 1)
+
+    def test_owner_can_create_anonymous_message_and_read_it_via_ajax(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.create_url, {
+            **self.message_data, "is_anonymous": "on",
+        })
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertTrue(response.json()["message"])
+        self.assertEqual(Message.objects.count(), 2)
+        created = Message.objects.get(pk=response.json()["pk"])
+        self.assertEqual(created.name, self.message_data["name"])
+        self.assertEqual(created.relationship, self.message_data["relationship"])
+        self.assertEqual(created.message, self.message_data["message"])
+        self.assertTrue(created.is_anonymous)
+
+        self.client.logout()
+        data = self.client.get(self.list_url).json()
+        item = next(item for item in data if item["pk"] == str(created.pk))
+        self.assertEqual(item["fields"]["name"], "Anonymous")
+        self.assertTrue(item["fields"]["is_anonymous"])
+        self.assertEqual(item["fields"]["message"], created.message)
+        self.assertEqual(item["fields"]["star_count"], 0)
+        self.assertIs(item["fields"]["is_starred"], False)
+
+    def test_create_requires_post(self):
+        self.client.force_login(self.owner)
+
+        for method in ["get", "put", "patch", "delete"]:
+            with self.subTest(method=method):
+                response = getattr(self.client, method)(self.create_url)
+                self.assertEqual(response.status_code, 405)
+                self.assertEqual(Message.objects.count(), 1)
+
+    def test_invalid_fields_return_json_errors_without_saving(self):
+        self.client.force_login(self.owner)
+
+        for field, value, error_code in [
+            ("name", "", "required"),
+            ("relationship", "", "required"),
+            ("message", "   ", "required"),
+            ("name", "a" * 101, "max_length"),
+            ("relationship", "a" * 101, "max_length"),
+        ]:
+            with self.subTest(field=field, error_code=error_code):
+                response = self.client.post(self.create_url, {
+                    **self.message_data, field: value,
+                })
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response["Content-Type"], "application/json")
+                error = response.json()["errors"][field][0]
+                self.assertEqual(error["code"], error_code)
+                self.assertTrue(error["message"])
+                self.assertEqual(Message.objects.count(), 1)
+
+    def test_html_tags_are_removed_from_all_text_fields_before_saving(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.create_url, {
+            "name": " <b>Alya</b> ",
+            "relationship": " <i>Friend</i> ",
+            "message": "<img src=x onerror=alert(1)>Semangat terus!",
+        })
+
+        self.assertEqual(response.status_code, 201)
+        created = Message.objects.get(pk=response.json()["pk"])
+        for field, value in self.message_data.items():
+            self.assertEqual(getattr(created, field), value)
+
+    def test_html_only_input_is_rejected_for_each_text_field(self):
+        self.client.force_login(self.owner)
+
+        for field in self.message_data:
+            with self.subTest(field=field):
+                response = self.client.post(self.create_url, {
+                    **self.message_data,
+                    field: "<img src=\"x\" onerror=\"alert('XSS!')\">",
+                })
+                self.assertEqual(response.status_code, 400)
+                self.assertTrue(response.json()["errors"][field][0]["message"])
+                self.assertEqual(Message.objects.count(), 1)
+
+    def test_create_requires_valid_csrf_header(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.owner)
+        client.get(reverse("main:show_main"))
+        token = client.cookies["csrftoken"].value
+
+        for headers in [{}, {"HTTP_X_CSRFTOKEN": "invalid"}]:
+            with self.subTest(headers=headers):
+                response = client.post(self.create_url, self.message_data, **headers)
+                self.assertEqual(response.status_code, 403)
+                self.assertEqual(Message.objects.count(), 1)
+
+        response = client.post(
+            self.create_url, self.message_data, HTTP_X_CSRFTOKEN=token,
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Message.objects.count(), 2)

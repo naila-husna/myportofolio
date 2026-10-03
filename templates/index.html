@@ -82,29 +82,14 @@
                 <div id="grid" class="message-grid hide"></div>
 
             </div>
-            {% if user.is_superuser %}
-
-            <div id="message-modal" class="message-form message-form-modal" popover="auto"
-                role="dialog" aria-modal="true" aria-labelledby="message-modal-title">
-                <button type="button" class="message-form-modal__close" popovertarget="message-modal"
-                    popovertargetaction="hide" aria-label="Tutup form">&times;</button>
-                <h2 id="message-modal-title">Add your own message!</h2>
-                <h3>Leave a message, thought, or encouragement for me</h3>
-                <form id="message-form" method="POST" action="{% url 'main:show_main' %}">
-                    {% csrf_token %}
-
-                    {{ form.as_p }}
-
-                    <button type="submit" class="button">Send Message</button>
-                </form>
-            </div>
-            {% endif %}
-
         </div>
     </section>
 
 </main>
 
+{% if user.is_superuser %}
+    {% include "components/message_form_modal.html" %}
+{% endif %}
 
 <script>
     // Konfigurasi
