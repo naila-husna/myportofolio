@@ -128,3 +128,63 @@ Saya menggunakan ChatGPT sebagai alat bantu untuk memahami konsep dan mendiskusi
 4. Evaluasi rancangan hak akses. Saya mengusulkan agar editor dapat membaca dan mengedit pesan serta memberikan atau membatalkan star, tetapi tidak dapat menambah atau menghapus pesan maupun masuk ke Django Admin. Admin memiliki seluruh kemampuan editor, ditambah akses untuk menambah dan menghapus pesan, mengakses Django Admin, mengelola akun, dan menentukan pengguna yang menjadi editor. ChatGPT membantu mengevaluasi kesesuaian rancangan tersebut dengan ketentuan tugas.
 
 5. Pertimbangan penerapan dan integritas data. ChatGPT menjelaskan perlunya pemeriksaan hak akses di sisi server selain menyembunyikan tombol pada tampilan, penggunaan grup Editor, serta pembatasan akses Django Admin. Kami juga membahas dampak pengeditan terhadap keaslian review dan potensi ketidaksesuaian antara fitur pengiriman review oleh pengguna biasa dengan ketentuan pembuatan data portofolio dalam tugas.
+
+### Tugas 5
+
+Username, password, dan cara penggunaan masih sama seperti sebelumnya
+
+1. Debouncing adalah teknik menunda suatu proses sampai pengguna berhenti melakukan aktivitas selama jeda waktu tertentu. Pada fitur pencarian pesan di portofolio saya, pencarian baru dijalankan setelah pengguna berhenti mengetik selama 300 milidetik. Setiap ada input baru, timer sebelumnya dibatalkan menggunakan clearTimeout, lalu timer baru dibuat dengan setTimeout. Tanpa debouncing, setiap huruf yang diketik dapat memicu request AJAX, padahal pengguna mungkin belum selesai menulis kata yang dicari. Dengan debouncing, jumlah request ke server berkurang dan hasil pencarian diperbarui setelah pengguna selesai mengetik sejenak. Tombol Cari tetap dapat digunakan untuk langsung menjalankan pencarian tanpa menunggu timer.
+
+2. await digunakan untuk menunggu sebuah Promise selesai sebelum melanjutkan baris berikutnya di dalam fungsi async, tanpa menghentikan seluruh aktivitas browser. Pada kode saya, await fetch() menunggu sampai respons server tersedia sehingga kode berikutnya dapat memeriksa response.ok. Setelah itu, await response.json() menunggu isi respons selesai dibaca dan diubah menjadi data JavaScript yang dapat digunakan untuk membuat kartu pesan. Jika await dihilangkan tanpa menggantinya dengan penanganan Promise seperti .then(), variabel hasil fetch() masih berisi Promise, bukan objek Response. Akibatnya, kode yang langsung memanggil response.json() akan mengalami error. Begitu juga jika response.json() tidak ditunggu, hasilnya masih berupa Promise sehingga belum dapat dipakai sebagai array untuk menampilkan daftar pesan.
+
+3. XSS atau Cross-Site Scripting adalah serangan ketika data yang dimasukkan ke website ditafsirkan sebagai kode dan dijalankan oleh browser pengguna lain. Contohnya adalah input <img src="x" onerror="alert('XSS!')"> yang dapat menjalankan JavaScript jika langsung dimasukkan ke HTML. Template Django secara default melakukan autoescaping terhadap nilai variabel, sehingga karakter khusus HTML ditampilkan sebagai teks. Sementara itu, saat data JSON dirangkai menjadi HTML melalui JavaScript dan dimasukkan ke innerHTML, perlindungan otomatis dari template Django tidak berlaku pada data tersebut. Jadi, yang membuatnya rentan adalah cara memasukkan data ke HTML tanpa escaping, bukan AJAX itu sendiri. Pada portofolio saya, escapeHtml() digunakan sebelum teks dimasukkan ke kartu pesan. Input juga dibersihkan dengan strip_tags melalui method clean_<field> pada MessageForm. Pembersihan di server merupakan perlindungan tambahan dan tetap harus disertai escaping saat data ditampilkan, termasuk untuk data lama yang sudah tersimpan.
+
+## AI Disclosure
+Saya menggunakan ChatGPT sebagai alat bantu untuk memahami requirement tugas, memperjelas konsep teknis, dan melakukan review terhadap implementasi yang telah saya kerjakan.
+
+### AI Tools Used
+ChatGPT (OpenAI)
+
+### How I Used AI
+
+Saya menggunakan AI terutama sebagai pendamping belajar dan reviewer. Strategi prompting yang saya gunakan adalah memberikan konteks mengenai requirement tugas, kemudian meminta penjelasan konsep tanpa meminta AI menghasilkan implementasi akhir secara langsung.
+
+Beberapa contoh penggunaan AI:
+
+- Memahami alur AJAX antara Django dan JavaScript.
+- Memahami perbedaan fungsi CSRF protection, `strip_tags()`, dan HTML escaping dalam mencegah jenis serangan yang berbeda.
+- Memahami penggunaan AJAX untuk mengambil data, melakukan pencarian dengan debouncing, dan mengirim form tanpa melakukan full-page reload.
+- Memahami penanganan HTTP response seperti `201`, `400`, dan `403`.
+- Mengevaluasi kemungkinan edge case, terutama untuk guest user, permission, error handling, CSRF, XSS, loading state, empty state, dan race condition pada pencarian.
+- Menyusun checklist pengujian untuk memastikan fitur berjalan pada beberapa role dan kondisi jaringan.
+
+### Prompting Strategy
+
+Prompt yang saya berikan umumnya berfokus pada pemahaman dan evaluasi, misalnya:
+
+"Tolong jelaskan requirement Tugas 5 tanpa memberikan kode hasil akhirnya."
+
+"Apa perbedaan perlindungan CSRF, strip_tags, dan escapeHTML? Apakah menggunakan salah satunya saja sudah cukup?"
+
+"Implementasi saya sudah selesai. Edge case atau detail apa yang masih perlu saya perhatikan?"
+
+Saya kemudian menggunakan penjelasan tersebut untuk memeriksa dan memperbaiki implementasi saya sendiri.
+
+### Parts Assisted by AI
+
+AI membantu pada bagian:
+
+1. Interpretasi requirement AJAX pada tugas.
+2. Pemahaman konsep keamanan CSRF dan XSS.
+3. Identifikasi edge case dan skenario pengujian.
+4. Review konseptual terhadap loading, empty, dan error state.
+5. Review permission untuk guest dan user dengan role berbeda.
+6. Pemahaman praktik aman ketika menampilkan data melalui JavaScript.
+
+Implementasi akhir, integrasi dengan project, penyesuaian terhadap model dan role aplikasi, serta pengujian dilakukan dan diverifikasi kembali oleh saya.
+
+### AI Prompt / Chat Log
+
+Log percakapan dengan AI disertakan sebagai dokumentasi penggunaan AI pada pengerjaan tugas ini.
+
+- AI Chat / Prompt Log: https://chatgpt.com/share/6ac37c84-3ec8-83ec-896f-961f003415f2
