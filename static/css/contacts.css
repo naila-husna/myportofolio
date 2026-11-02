@@ -1,0 +1,74 @@
+#contacts .contact-panel {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+#contacts h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.contact-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.contact-field label,
+.contact-search label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+#contacts input {
+    width: 100%;
+    min-width: 0;
+    padding: 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: white;
+    color: var(--ink);
+    font: inherit;
+}
+
+#contacts input:focus-visible,
+#contacts button:focus-visible {
+    outline: 2px solid var(--accent-dark);
+    outline-offset: 2px;
+}
+
+#contacts button {
+    padding: 0.65rem 1rem;
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+#contacts button:hover { background: var(--accent-dark); }
+#contacts button:disabled { opacity: 0.6; cursor: wait; }
+#contacts .contact-delete { background: var(--danger); }
+#contacts .contact-delete:hover { background: var(--danger-dark); }
+#contacts .contact-errors { color: var(--danger); padding-left: 1rem; }
+#feedback { margin-top: 1rem; color: var(--accent-dark); }
+.contact-search { max-width: 420px; margin-bottom: 1rem; }
+.contact-table-wrap { overflow-x: auto; }
+.contact-table { width: 100%; border-collapse: collapse; }
+.contact-table th, .contact-table td { padding: 0.8rem; border-bottom: 1px solid var(--line); text-align: left; }
+.contact-table td { overflow-wrap: anywhere; }
+.contact-table td input { min-width: 130px; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.contact-empty { display: none; padding: 1.5rem; text-align: center; color: var(--text-muted); }
+.contact-table:not(:has(tbody tr)) + .contact-empty { display: block; }
+.contact-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+@media (max-width: 700px) {
+    .contact-form { grid-template-columns: 1fr; }
+    .contact-table { min-width: 580px; }
+}

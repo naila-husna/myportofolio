@@ -1,0 +1,11 @@
+<div id="feedback" role="status" aria-live="polite" hx-swap-oob="true">
+    {% if form.errors %}
+    <ul class="contact-errors">
+        {% for field in form %}
+        {% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}
+        {% endfor %}
+    </ul>
+    {% else %}
+    {{ feedback }}
+    {% endif %}
+</div>
