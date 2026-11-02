@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Education - {{ name }}</title>
+{% endblock meta %}
+
+{% block content %}
+<main>
+    <section class="page-section education-section" id="education">
+        <div class="container">
+            <p class="section-kicker">Formal</p>
+            <h1>Education</h1>
+
+            <div class="education-timeline">
+                {% for education in education_list %}
+
+                <article class="education-item">
+                    <span class="timeline-dot"></span>
+
+                    <div class="education-content">
+                        <p class="education-period">
+                            {{ education.start_year }} —
+                            {% if education.end_year %}
+                            {{ education.end_year }}
+                            {% else %}
+                            Present
+                            {% endif %}
+                        </p>
+
+                        <h2>{{ education.institution }}</h2>
+
+                        <p class="education-program">
+                            {{ education.program }}
+                        </p>
+                    </div>
+                </article>
+
+                {% empty %}
+                <p class="empty-state">
+                    Belum ada data pendidikan yang ditambahkan.
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock content %}

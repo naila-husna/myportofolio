@@ -24,3 +24,167 @@ Tugas pertama dalam mata kuliah Pemrograman Bebasis Platform yang meminta mahasi
 
 ### Penggunaan AI
 Dalam pengerjaan tugas ini, saya menggunakan ChatGPT sebagai alat bantu proses pengembangan website, karena saya merasa masih sangat awam dengan HTML. AI saya gunakan untuk memastikan struktur HTML, membantu memberikan ide untuk styling, serta memberikan arahan ketika ada masalah pada tampilan website. Tetapi, tentunya saran-saran dari ChatGPT tidak saya terima secara mentah-mentah, saya juga memodifikasikan kembali agar sesuai dengan desain yang saya inginkan.
+
+## Tugas 2
+1. Ketika user membuka page Education lewat navbar, browser akan mengirimkan request ke URL /education/. Request tersebut akan diproses oleh urls.py pada portofolio/urls.pt yang akan meneruskan ke main/urls.py. Yang selanjutnya akan diteruskan ke view show_education, yang kemudian mengambil seluruh data dari model Education dengan Education.objects.all(), kemudian memasukkannya ke context dengan education_list, yang akhirnya akan diteruskan ke education.html. Di dalam template, Django dengan DTL akan melakukan perulangan terhadap education_list, sehingga tiap object yang ada di education_list tampil secara dinamis. Jika tidak ada data, {% empty %} akan menampilkan pesan bahwa data pendidikan belum tersedia. Setelah proses rendering selesai, Django mengirim HTML sebagai response kembali ke browser.
+
+2. Karena model memisahkan data dari tampilan HTML. Dengan ini, saya dapat dengan mudah meng-edit data-data yang ada tanpa harus membuat elemen HTML baru dengan manual. Dengan adanya template, portofolio saya lebih mudah untuk dipelihara karena perubahan data tidak mengharuskan perubahan struktur tampilan
+
+3. makemigrations digunakan untuk mendeteksi perubahan pada model Django dan membuat file migration yang berisi instruksi perubahan struktur database. Sementara itu, migrate digunakan untuk menerapkan file migration tersebut ke database sehingga struktur database benar-benar berubah. Contohnya adalahh ketika saya menambahkan model baru Education dengan field institution, program, start_year, end_year, dan activities. Saya me-running python manage.py migrate agar tabel agar 0003_education.py dibuat oleh Django, yang dilanjutkan dengan menjalankan python manage.py migrate agar tabel untuk model Education benar-benar dibuat di database
+
+### Penggunaan AI
+
+Dalam pengerjaan Tugas 2, saya menggunakan ChatGPT (GPT-5.6 Sol) sebagai alat bantu saya untuk lebih memahami materi dan juga debugging, serta membantu menganalisis permasalahan ketika implementasi yang saya inginkan tidak sesuai. Saya tidak meminta AI untuk lgsg memberikan solusi untuk seluruh tugas. Pada sesi ini, sayameminta AI unruk membimbing saya dalam proses pengerjaannya dan saya meminta AI untuk menjelaskan materi lebih dalam. Saya juga memberikan dokumen soal dan tutorial sebagai acuan agar AI tidak melebihi dari batasan yang diminta oleh tugas.
+
+Dengan strategi iteratif, pada awalnya saya meminta ChatGPT secara eksplisit untuk jangan membantu saya memberikan jawaban, alih-alih membimbing saya dengan mengikuti tutorial 2. Setelah mencoba sendiri, saya menghadapi masalah bahwa tampilan css saya tidak dapat berubah, jadi saya bertanya mengenai kemungkinan yang dapat terjadi sebagai kemungkinan alasan ketidakbisaan saya mengubah css. ChatGPT membantu saya pada beberapa bagian terutama dalam css dan mendalami unit testing dalam Django
+
+Implementasi tetap saya lakukan sendiri, pemilihan keseluruhan tetap saya yang memutuskan, AI hanya sebatas alat mempertimbangkan dan debugging saja
+
+Log chat: https://chatgpt.com/share/6aa7a5db-62a8-83ec-97ba-e2a7c440fd0d
+
+## Tugas 3
+1. Menurut saya, penggunaan ModelForm lebih praktis dibandingkan membuat form HTML secara manual karena ModelForm dapat langsung mengikuti struktur model yang sudah dibuat. Pada tugas ini, saya menggunakan MessageForm yang terhubung dengan model Message sehingga field seperti name, relationship, message, dan is_anonymous dapat langsung digunakan tanpa harus membuat proses validasi dan penyimpanan satu per satu secara manual. Setelah form dinyatakan valid, data juga dapat langsung disimpan menggunakan form.save(). Sementara itu, {% csrf_token %} diperlukan karena form melakukan request POST yang dapat mengubah data pada database, seperti ketika menambahkan, mengubah, atau menghapus Message. CSRF token membantu Django memastikan bahwa request tersebut memang berasal dari halaman aplikasi yang valid dan mencegah pihak lain mengirim request tanpa sepengetahuan user.
+
+2. JSON lebih sering digunakan karena strukturnya lebih ringkas dan lebih mudah dibaca dibandingkan XML. Pada XML, data membutuhkan tag pembuka dan penutup sehingga penulisannya bisa menjadi lebih panjang. JSON cukup menggunakan pasangan key dan value sehingga strukturnya lebih sederhana. JSON juga mudah digunakan bersama JavaScript yang banyak digunakan pada sisi frontend. Menurut saya, hal tersebut membuat proses pengiriman dan pengolahan data antara backend dan frontend menjadi lebih praktis. Walaupun begitu, XML tetap dapat digunakan dan pemilihan format data tetap bergantung pada kebutuhan aplikasi.
+
+3. Pada implementasi saya, fungsi get_messages_json() terlebih dahulu mengambil data Message dari database, lalu mengecek field is_anonymous agar nama user yang memilih anonim dapat diubah menjadi "Anonymous" sebelum data dikirim. Setelah itu, serializers.serialize("json", messages) digunakan untuk mengubah object Django menjadi format JSON dan hasilnya dikembalikan menggunakan HttpResponse dengan content_type application/json. Pada show_main(), response JSON tersebut kemudian dibaca kembali menggunakan serializers.deserialize() dan hasilnya diubah menjadi object Message sebelum dimasukkan ke message_list pada context dan ditampilkan melalui index.html. Proses serialization diperlukan karena object model Django merupakan object Python yang tidak dapat langsung dikirim sebagai format data melalui HTTP, sehingga perlu diubah terlebih dahulu ke format yang dapat ditransmisikan seperti JSON. Pada tugas ini proses serialization dan deserialization memang masih terjadi dalam satu aplikasi, tetapi implementasi tersebut membantu saya memahami alur pertukaran data antara backend dan client.
+
+### Penggunaan AI
+Dalam pengerjaan Tugas 3, saya menggunakan ChatGPT terutama untuk membantu memahami konsep yang belum saya pahami secara penuh dan sebagai bantuan saat melakukan troubleshooting. Saya berdiskusi mengenai alasan data perlu melalui proses serialization dan deserialization serta memahami bahwa tujuan utamanya bukan sekadar membuat data menjadi lebih compact, melainkan mengubah object menjadi format yang dapat dikirim atau dipertukarkan dan kemudian dikembalikan menjadi object yang dapat digunakan oleh aplikasi. Saya juga menggunakan AI untuk mendiskusikan fitur anonymous pada bagian Message, khususnya mengenai perbedaan antara hanya menyembunyikan nama pada tampilan dan memastikan nama tersebut juga tidak terekspos melalui data JSON. Selain itu, saya menggunakan AI untuk mencari kemungkinan penyebab ketika perubahan CSS tidak muncul pada halaman, seperti cache browser, selector yang tidak sesuai, atau file CSS yang tidak terbaca. Saran yang diberikan AI tetap saya sesuaikan kembali dengan struktur dan kebutuhan portofolio saya sebelum diterapkan.
+
+Log chat: https://chatgpt.com/share/6ab13cbb-8250-83ec-872b-11061ef41662 
+
+## Tugas 4
+MyPortofolio adalah website portofolio pribadi berbasis Django yang menampilkan profil, pendidikan, pengalaman, dan pesan. Website ini menyediakan registrasi, login, fitur star, serta pembagian akses untuk admin, editor, dan pengguna biasa.
+
+Username & Password
+__Akun Biasa__
+usn: nailahusna
+pass: naila101
+
+__Akun Admin__
+usn: admin
+pass: naila101
+
+__Akun Editor__
+usn: editor
+pass: pbpgong
+
+Untuk menjalankan proyek di Windows, siapkan Python 3.12 dan Git, lalu ikuti langkah berikut melalui PowerShell.
+
+1. Clone repositori dan masuk ke folder proyek.
+   git clone https://github.com/naila-husna/myportofolio.git
+   cd myportofolio
+
+2. Buat virtual environment.
+   py -3.12 -m venv env
+
+3. Install dependensi proyek.
+   .\env\Scripts\python.exe -m pip install -r requirements.txt
+
+4. Gunakan database lokal dan jalankan migrasi di terminal yang sama.
+   $env:PRODUCTION = "False"
+   .\env\Scripts\python.exe manage.py migrate
+
+5. Buat akun admin.
+   .\env\Scripts\python.exe manage.py createsuperuser
+
+   Isi username, email, dan password sesuai petunjuk terminal. Karakter password tidak akan terlihat saat diketik.
+
+6. Jalankan server pengembangan.
+   .\env\Scripts\python.exe manage.py runserver
+
+7. Buka website melalui browser.
+   http://127.0.0.1:8000/
+
+   Halaman yang tersedia:
+   - /register/ untuk membuat akun biasa.
+   - /login/ untuk masuk ke akun.
+   - /admin/ untuk mengelola pengguna dan grup menggunakan akun admin.
+   Pengguna biasa dapat memberikan atau membatalkan star. Admin dapat menambah, mengedit, dan menghapus pesan.
+
+8. Siapkan akun editor jika diperlukan.
+   Daftarkan akun biasa, lalu masuk ke Django Admin. Buat grup bernama persis Editor. Buka pengaturan akun yang ingin dijadikan editor, pindahkan grup tersebut ke bagian Chosen groups, lalu simpan.
+
+   Pastikan akun aktif, tetapi Staff status dan Superuser status tidak dicentang. Akun editor dapat login melalui /login/ untuk mengedit pesan.
+
+9. Hentikan server dengan menekan Ctrl + C.
+   Untuk menjalankannya kembali, buka PowerShell di folder proyek dan jalankan:
+
+   powershell
+   $env:PRODUCTION = "False"
+   .\env\Scripts\python.exe manage.py runserver
+Database lokal menggunakan SQLite. Akun dan data dari komputer pembuat proyek tidak otomatis ikut saat clone, sehingga perlu dibuat kembali pada instalasi baru.
+
+### Penggunaan AI
+Saya menggunakan ChatGPT sebagai alat bantu untuk memahami konsep dan mendiskusikan pembagian hak akses pada website portofolio. Bagian yang dibantu AI meliputi:
+
+1. Pemahaman cache Python. Saya menanyakan mengapa cache Python dapat muncul kembali setelah dihapus. ChatGPT menjelaskan proses pembentukan cache secara otomatis, perbedaan __pycache__, cache pip, dan .pytest_cache, serta cara mencegah penulisan cache bytecode saat menjalankan program.
+
+2. Pemahaman ketentuan tugas. Saya memberikan dokumen Tugas 4 dan Tutorial 4 sebagai referensi untuk mendiskusikan ketentuan autentikasi dan otorisasi, terutama perbedaan hak akses pengguna biasa, editor, dan pemilik portofolio.
+
+3. Perancangan peran editor dan admin. Saya mendiskusikan pembagian akses yang sesuai dengan fitur pesan pada portofolio, lalu memperjelas bahwa pesan tersebut berbentuk review atau testimoni dari pengunjung. Diskusi mencakup kewenangan membaca, mengedit, menambah, dan menghapus pesan, serta memberikan atau membatalkan star.
+
+4. Evaluasi rancangan hak akses. Saya mengusulkan agar editor dapat membaca dan mengedit pesan serta memberikan atau membatalkan star, tetapi tidak dapat menambah atau menghapus pesan maupun masuk ke Django Admin. Admin memiliki seluruh kemampuan editor, ditambah akses untuk menambah dan menghapus pesan, mengakses Django Admin, mengelola akun, dan menentukan pengguna yang menjadi editor. ChatGPT membantu mengevaluasi kesesuaian rancangan tersebut dengan ketentuan tugas.
+
+5. Pertimbangan penerapan dan integritas data. ChatGPT menjelaskan perlunya pemeriksaan hak akses di sisi server selain menyembunyikan tombol pada tampilan, penggunaan grup Editor, serta pembatasan akses Django Admin. Kami juga membahas dampak pengeditan terhadap keaslian review dan potensi ketidaksesuaian antara fitur pengiriman review oleh pengguna biasa dengan ketentuan pembuatan data portofolio dalam tugas.
+
+### Tugas 5
+
+Username, password, dan cara penggunaan masih sama seperti sebelumnya
+
+1. Debouncing adalah teknik menunda suatu proses sampai pengguna berhenti melakukan aktivitas selama jeda waktu tertentu. Pada fitur pencarian pesan di portofolio saya, pencarian baru dijalankan setelah pengguna berhenti mengetik selama 300 milidetik. Setiap ada input baru, timer sebelumnya dibatalkan menggunakan clearTimeout, lalu timer baru dibuat dengan setTimeout. Tanpa debouncing, setiap huruf yang diketik dapat memicu request AJAX, padahal pengguna mungkin belum selesai menulis kata yang dicari. Dengan debouncing, jumlah request ke server berkurang dan hasil pencarian diperbarui setelah pengguna selesai mengetik sejenak. Tombol Cari tetap dapat digunakan untuk langsung menjalankan pencarian tanpa menunggu timer.
+
+2. await digunakan untuk menunggu sebuah Promise selesai sebelum melanjutkan baris berikutnya di dalam fungsi async, tanpa menghentikan seluruh aktivitas browser. Pada kode saya, await fetch() menunggu sampai respons server tersedia sehingga kode berikutnya dapat memeriksa response.ok. Setelah itu, await response.json() menunggu isi respons selesai dibaca dan diubah menjadi data JavaScript yang dapat digunakan untuk membuat kartu pesan. Jika await dihilangkan tanpa menggantinya dengan penanganan Promise seperti .then(), variabel hasil fetch() masih berisi Promise, bukan objek Response. Akibatnya, kode yang langsung memanggil response.json() akan mengalami error. Begitu juga jika response.json() tidak ditunggu, hasilnya masih berupa Promise sehingga belum dapat dipakai sebagai array untuk menampilkan daftar pesan.
+
+3. XSS atau Cross-Site Scripting adalah serangan ketika data yang dimasukkan ke website ditafsirkan sebagai kode dan dijalankan oleh browser pengguna lain. Contohnya adalah input <img src="x" onerror="alert('XSS!')"> yang dapat menjalankan JavaScript jika langsung dimasukkan ke HTML. Template Django secara default melakukan autoescaping terhadap nilai variabel, sehingga karakter khusus HTML ditampilkan sebagai teks. Sementara itu, saat data JSON dirangkai menjadi HTML melalui JavaScript dan dimasukkan ke innerHTML, perlindungan otomatis dari template Django tidak berlaku pada data tersebut. Jadi, yang membuatnya rentan adalah cara memasukkan data ke HTML tanpa escaping, bukan AJAX itu sendiri. Pada portofolio saya, escapeHtml() digunakan sebelum teks dimasukkan ke kartu pesan. Input juga dibersihkan dengan strip_tags melalui method clean_<field> pada MessageForm. Pembersihan di server merupakan perlindungan tambahan dan tetap harus disertai escaping saat data ditampilkan, termasuk untuk data lama yang sudah tersimpan.
+
+## AI Disclosure
+Saya menggunakan ChatGPT sebagai alat bantu untuk memahami requirement tugas, memperjelas konsep teknis, dan melakukan review terhadap implementasi yang telah saya kerjakan.
+
+### AI Tools Used
+ChatGPT (OpenAI)
+
+### How I Used AI
+
+Saya menggunakan AI terutama sebagai pendamping belajar dan reviewer. Strategi prompting yang saya gunakan adalah memberikan konteks mengenai requirement tugas, kemudian meminta penjelasan konsep tanpa meminta AI menghasilkan implementasi akhir secara langsung.
+
+Beberapa contoh penggunaan AI:
+
+- Memahami alur AJAX antara Django dan JavaScript.
+- Memahami perbedaan fungsi CSRF protection, `strip_tags()`, dan HTML escaping dalam mencegah jenis serangan yang berbeda.
+- Memahami penggunaan AJAX untuk mengambil data, melakukan pencarian dengan debouncing, dan mengirim form tanpa melakukan full-page reload.
+- Memahami penanganan HTTP response seperti `201`, `400`, dan `403`.
+- Mengevaluasi kemungkinan edge case, terutama untuk guest user, permission, error handling, CSRF, XSS, loading state, empty state, dan race condition pada pencarian.
+- Menyusun checklist pengujian untuk memastikan fitur berjalan pada beberapa role dan kondisi jaringan.
+
+### Prompting Strategy
+
+Prompt yang saya berikan umumnya berfokus pada pemahaman dan evaluasi, misalnya:
+
+"Tolong jelaskan requirement Tugas 5 tanpa memberikan kode hasil akhirnya."
+
+"Apa perbedaan perlindungan CSRF, strip_tags, dan escapeHTML? Apakah menggunakan salah satunya saja sudah cukup?"
+
+"Implementasi saya sudah selesai. Edge case atau detail apa yang masih perlu saya perhatikan?"
+
+Saya kemudian menggunakan penjelasan tersebut untuk memeriksa dan memperbaiki implementasi saya sendiri.
+
+### Parts Assisted by AI
+
+AI membantu pada bagian:
+
+1. Interpretasi requirement AJAX pada tugas.
+2. Pemahaman konsep keamanan CSRF dan XSS.
+3. Identifikasi edge case dan skenario pengujian.
+4. Review konseptual terhadap loading, empty, dan error state.
+5. Review permission untuk guest dan user dengan role berbeda.
+6. Pemahaman praktik aman ketika menampilkan data melalui JavaScript.
+
+Implementasi akhir, integrasi dengan project, penyesuaian terhadap model dan role aplikasi, serta pengujian dilakukan dan diverifikasi kembali oleh saya.
+
+### AI Prompt / Chat Log
+
+Log percakapan dengan AI disertakan sebagai dokumentasi penggunaan AI pada pengerjaan tugas ini.
+
+- AI Chat / Prompt Log: https://chatgpt.com/share/6ac37c84-3ec8-83ec-896f-961f003415f2

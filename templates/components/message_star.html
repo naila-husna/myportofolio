@@ -1,0 +1,18 @@
+<form method="post" action="{% url 'main:toggle_star' message.id %}" class="star-form">
+    {% csrf_token %}
+
+    <button type="submit" class="button button-star{% if user in message.starred_by.all %} is-starred{% endif %}"
+        title="{% if message.starred_by.all %}Dibintangi oleh {{ message.starred_by.all|join:', ' }}{% else %}Jadilah yang pertama memberi star{% endif %}">
+        <span aria-hidden="true">★</span>
+
+        {% if user in message.starred_by.all %}
+        Unstar
+        {% else %}
+        Star
+        {% endif %}
+
+        <span class="star-count">
+            {{ message.starred_by.count }}
+        </span>
+    </button>
+</form>

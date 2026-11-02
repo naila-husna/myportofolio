@@ -1,0 +1,25 @@
+<tr id="contact-{{ contact.pk }}">
+    {% for field in form %}
+    <td>
+        <label class="contact-caption" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <input id="{{ field.id_for_label }}" type="{% if field.name == 'email' %}email{% elif field.name == 'phone' %}tel{% else %}text{% endif %}"
+               name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}"
+               maxlength="{{ field.field.max_length }}" required form="edit-form-{{ contact.pk }}"
+               {% if field.errors %}aria-invalid="true" aria-describedby="{{ field.id_for_label }}-errors"{% endif %}>
+        {% if field.errors %}<div id="{{ field.id_for_label }}-errors" class="contact-errors">{{ field.errors }}</div>{% endif %}
+    </td>
+    {% endfor %}
+    <td>
+        <div class="contact-actions">
+            <form id="edit-form-{{ contact.pk }}"
+                  hx-put="{% url 'contacts:contact_update' contact.pk %}"
+                  hx-target="#contact-{{ contact.pk }}" hx-swap="outerHTML"
+                  hx-include="#contact-search" hx-disabled-elt="find button">
+                {% csrf_token %}
+                <button type="submit">Simpan</button>
+            </form>
+            <button type="button" hx-get="{% url 'contacts:contact_row' contact.pk %}"
+                    hx-target="#contact-{{ contact.pk }}" hx-swap="outerHTML">Batal</button>
+        </div>
+    </td>
+</tr>

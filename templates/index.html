@@ -1,146 +1,329 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block meta %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naila Husna - Portofolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=11">
-</head>
+<title>Naila Husna - Portofolio</title>
 
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-            </nav>
-        </div>
-    </header>
+{% endblock meta %}
 
-    <main>
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Information System&middot; Universitas Indonesia</p>
-                    <h1> {{ name }} </h1>
-                </div>
-                <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of {{ name }}!">
-                </div>
-                <div class="hero-details">
-                    <p class="bio"> {{ bio }} </p>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
-                        </div>
-                    </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/naila-husna" class="social-link">GitHub</a>
-                        <a href="https://linkedin.com/nhusnats" class="social-link">LinkedIn</a>
-                        <a href="mailto: naila.husna@ui.ac.id" class="social-link">Email</a>
+{% block content %}
+<main>
+    <section class="hero" id="profile">
+        <div class="container hero-grid">
+            <div class="hero-identity">
+                <p class="hero-kicker">Information System&middot; Universitas Indonesia</p>
+                <h1> {{ name }} </h1>
+            </div>
+
+            <div class="hero-photo">
+                <div class="photo-block"></div>
+                <img class="avatar" src="/static/img/naila.jpeg" alt="Photo of {{ name }}!">
+            </div>
+
+            <div class="hero-details">
+                <p class="bio"> {{ bio }} </p>
+
+                <dl class="meta-list">
+                    <div class="meta-row">
+                        <dt>NPM</dt>
+                        <dd>{{ npm }}</dd>
                     </div>
+                    <div class="meta-row">
+                        <dt>Program</dt>
+                        <dd>{{ study_program }}</dd>
+                    </div>
+                    <div class="meta-row">
+                        <dt>Sesi Terakhir Login</dt>
+                        <dd>{{ last_login }}</dd>
+                    </div>
+                </dl>
+
+                <div class="social-links">
+                    <a href="https://github.com/naila-husna" class="social-link">GitHub</a>
+                    <a href="https://linkedin.com/nhusnats" class="social-link">LinkedIn</a>
+                    <a href="mailto:naila.husna@ui.ac.id" class="social-link">Email</a>
                 </div>
             </div>
-        </section>
-
-        <section class="education" id="education">
-            <div class="container">
-
-                <div class="education-heading">
-                    <p>FORMAL</p>
-                    <h2>Education</h2>
-                </div>
-
-                <div class="education-timeline">
-
-                    <article class="education-item university">
-                        <div class="timeline-dot"></div>
-
-                        <div class="education-card">
-                            <p class="education-year">2025 — Present</p>
-                            <h3>Universitas Indonesia</h3>
-                            <p class="education-program">
-                                S1 Information System
-                            </p>
-                        </div>
-                    </article>
-
-                    <article class="education-item highschool">
-                        <div class="timeline-dot"></div>
-
-                        <div class="education-card">
-                            <p class="education-year">2022 — 2025</p>
-                            <h3>SMAN 2 Depok</h3>
-                            <p class="education-program">Science</p>
-                        </div>
-                    </article>
-
-                </div>
-
-            </div>
-        </section>
-
-        <section class="experience" id="experience">
-            <div class="container">
-
-                <div class="experience-heading">
-                    <p>WORK</p>
-                    <h2>Experience</h2>
-                </div>
-
-                <div class="experience-grid">
-
-                    <article class="experience-card">
-                        <p class="experience-year">2025</p>
-                        <h3>Open House Fasilkom UI 2025</h3>
-                        <p class="experience-role">Staff, Operational Division</p>
-                        <p>
-                            Coordinated room reservations, supported venue preparation,
-                            and helped manage the movement of 200+ participants.
-                        </p>
-                    </article>
-
-                    <article class="experience-card">
-                        <p class="experience-year">2024</p>
-                        <h3>APSI 2024</h3>
-                        <p class="experience-role">Secretary, Logistics Division</p>
-                        <p>
-                            Documented essential event materials, managed item placement,
-                            and collaborated with the decoration team.
-                        </p>
-                    </article>
-
-                    <article class="experience-card">
-                        <p class="experience-year">2023</p>
-                        <h3>AKAR SMADA 2023</h3>
-                        <p class="experience-role">Secretary, Logistics Division</p>
-                        <p>
-                            Coordinated logistics for guest artists and checked
-                            equipment and supplies before the event.
-                        </p>
-                    </article>
-
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
-    </footer>
-</body>
+    </section>
 
-</html>
+    <section class="messages" id="messages">
+        <div class="container">
+
+            <div class="message-list">
+
+                <h2>What they said about me</h2>
+                <h3>A collection of messages from friends and teammates</h3>
+
+                <div class="message-toolbar">
+                    <form id="message-search-form" role="search">
+                        <input type="search" id="search-input" name="message" value="{{ message_query }}"
+                            placeholder="Cari berdasarkan isi pesan" aria-label="Cari berdasarkan isi pesan">
+                        <button type="submit" class="button">Cari</button>
+                    </form>
+                    {% if user.is_superuser %}
+                    <button type="button" class="button button-secondary" popovertarget="message-modal">
+                        + Tambah Pesan
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div id="loading" class="empty-state hide">
+                    <p>Memuat pesan...</p>
+                </div>
+
+                <div id="error" class="empty-state hide">
+                    <p>Gagal memuat pesan. Silakan coba lagi.</p>
+                </div>
+
+                <div id="empty" class="empty-state hide">
+                    <p>Belum ada pesan yang ditambahkan atau ditemukan.</p>
+                </div>
+
+                <div id="grid" class="message-grid hide"></div>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+{% if user.is_superuser %}
+    {% include "components/message_form_modal.html" %}
+{% endif %}
+
+{% csrf_token %}
+<script>
+    // Konfigurasi
+    const BASE_MESSAGES_ENDPOINT = "{% url 'api:message-list' %}";
+    const DETAIL_MESSAGE_ENDPOINT = "{% url 'api:message-detail' 0 %}";
+    const STAR_MESSAGE_ENDPOINT = "{% url 'api:message-star' 0 %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+    let messagesAbortController;
+
+    // Elemen DOM
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('message-search-form');
+    const searchInput = document.getElementById('search-input');
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+    const messageForm = document.getElementById('message-form');
+    const messageModal = document.getElementById('message-modal');
+
+    // Menyembunyikan/Menampilkan section halaman
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';').map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+        return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : '';
+    }
+
+    function messageEndpoint(pattern, id) {
+        return pattern.replace('/0/', `/${encodeURIComponent(id)}/`);
+    }
+
+    // Membuat elemen card pesan
+    function buildMessageCardElement(message) {
+        const messageId = message.id;
+        const articleElement = document.createElement('article');
+        articleElement.className = 'message-card';
+
+        const editUrl = messageEndpoint("{% url 'main:update_message' 0 %}", messageId);
+
+        const editHtml = IS_SUPERUSER || IS_EDITOR? `<a href="${editUrl}" class="button">Edit</a>` : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<button type="button" class="button button-danger"
+                data-action="delete" data-id="${escapeHtml(messageId)}">Hapus</button>`
+            : '';
+
+        const isStarredClass = message.is_starred ? " is-starred" : "";
+        const starText = message.is_starred ? "Unstar" : "Star";
+        const starTitle = message.star_count > 0
+            ? `Dibintangi oleh ${message.starred_by_names}`
+            : "Jadilah yang pertama memberi star";
+        const starHtml = IS_AUTHENTICATED
+            ? `<button type="button" class="button button-star${isStarredClass}"
+                    data-action="star" data-id="${escapeHtml(messageId)}"
+                    title="${escapeHtml(starTitle)}" aria-pressed="${message.is_starred}">
+                    <span aria-hidden="true">&#9733;</span>
+                    ${starText}
+                    <span class="star-count">${escapeHtml(message.star_count)}</span>
+               </button>`
+            : `<a href="{% url 'main:login' %}" class="button button-star">
+                    <span aria-hidden="true">&#9733;</span>
+                    Star <span class="star-count">${escapeHtml(message.star_count)}</span>
+               </a>`;
+
+        // Komponen card
+        const completeCardHtml = `
+            <h3>${escapeHtml(message.name)}</h3>
+            <p class="message-text">${escapeHtml(message.message)}</p>
+            <div class="message-card-actions">
+                <div class="message-actions">
+                    
+                    ${starHtml}
+                    
+                    ${editHtml}
+                    ${deleteHtml}
+                </div>
+            </div>
+        `;
+
+        articleElement.innerHTML = completeCardHtml;
+        return articleElement;
+    }
+
+    // Fetch data pesan
+    async function fetchMessages(searchQuery = "") {
+        if (messagesAbortController) messagesAbortController.abort();
+        messagesAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery ? `${BASE_MESSAGES_ENDPOINT}?message=${encodeURIComponent(searchQuery)}` : BASE_MESSAGES_ENDPOINT;
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: messagesAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const messageData = await response.json();
+
+            gridContainer.replaceChildren(...messageData.map(buildMessageCardElement));
+            if (messageData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading Message:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    function searchMessages() {
+        fetchMessages(searchInput.value.trim());
+    }
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(searchMessages, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    // Event Handlers untuk Form Search
+    searchForm.addEventListener('submit', function (e) {
+        e.preventDefault(); // Mencegah reload halaman
+        clearTimeout(searchDebounceTimer);
+        searchMessages();
+    });
+
+    function closeMessageModal() {
+        if (messageModal && messageModal.matches(':popover-open')) {
+            messageModal.hidePopover();
+        }
+    }
+
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data).flat().filter(value => typeof value === 'string');
+        return messages.join(' ') || `Permintaan gagal (HTTP ${status}).`;
+    }
+
+    async function writeMessage(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        return data;
+    }
+
+    async function addMessage(event) {
+        event.preventDefault();
+        const submitButton = messageForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const fields = new FormData(messageForm);
+            const payload = {
+                name: fields.get('name'),
+                relationship: fields.get('relationship'),
+                message: fields.get('message'),
+                is_anonymous: fields.has('is_anonymous'),
+            };
+            await writeMessage(BASE_MESSAGES_ENDPOINT, 'POST', payload);
+            messageForm.reset();
+            closeMessageModal();
+            showToast('Berhasil', 'Pesan baru berhasil ditambahkan!', 'success');
+            clearTimeout(searchDebounceTimer);
+            await fetchMessages(searchInput.value.trim());
+        } catch (error) {
+            console.error('Error adding message:', error);
+            showToast('Gagal menambahkan pesan', error.message, 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (messageForm) {
+        messageForm.addEventListener('submit', addMessage);
+        if ("{{ form.errors|yesno:'true,false' }}" === "true") {
+            messageModal.showPopover();
+        }
+    }
+
+    gridContainer.addEventListener('click', async function (event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button || button.disabled) return;
+        const action = button.dataset.action;
+        if (action !== 'star' && action !== 'delete') return;
+        if (action === 'delete' && !window.confirm('Yakin ingin menghapus message ini?')) return;
+        button.disabled = true;
+        try {
+            const pattern = action === 'star' ? STAR_MESSAGE_ENDPOINT : DETAIL_MESSAGE_ENDPOINT;
+            await writeMessage(messageEndpoint(pattern, button.dataset.id),
+                action === 'star' ? 'POST' : 'DELETE');
+            showToast('Berhasil', action === 'star' ? 'Star diperbarui.' : 'Pesan dihapus.', 'success');
+            clearTimeout(searchDebounceTimer);
+            await fetchMessages(searchInput.value.trim());
+        } catch (error) {
+            showToast('Permintaan gagal', error.message, 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    // Start application
+    fetchMessages(searchInput.value.trim());
+</script>
+{% endblock content %}

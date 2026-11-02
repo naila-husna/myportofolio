@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Contacts - {{ name }}</title>
+<link rel="stylesheet" href="{% static 'css/contacts.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js" defer></script>
+{% endblock meta %}
+
+{% block content %}
+<main id="contacts" lang="id"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-sync="this:queue all"
+      hx-on::before-swap="if (event.detail.xhr.status === 422) event.detail.shouldSwap = true"
+      hx-on::response-error="if (event.detail.xhr.status !== 422) document.getElementById('feedback').textContent = 'Permintaan gagal. Silakan coba lagi.'"
+      hx-on::send-error="document.getElementById('feedback').textContent = 'Koneksi terputus. Silakan coba lagi.'">
+    <section class="page-section">
+        <div class="container">
+            <p class="section-kicker">Contacts</p>
+            <h1>Daftar Kontak</h1>
+
+            <div class="contact-panel">
+                <h2>Tambah Kontak</h2>
+                <form class="contact-form" method="post" action="{% url 'contacts:contact_add' %}"
+                      hx-post="{% url 'contacts:contact_add' %}"
+                      hx-target="#contact-rows" hx-select="tr" hx-swap="beforeend"
+                      hx-include="#contact-search" hx-disabled-elt="find button"
+                      hx-on::after-request="if (event.detail.successful) this.reset()">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="contact-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    <button type="submit">Tambah</button>
+                </form>
+                <div id="feedback" role="status" aria-live="polite"></div>
+            </div>
+
+            <div class="contact-search">
+                <label for="contact-search">Cari kontak</label>
+                <input id="contact-search" type="search" name="q" placeholder="Cari berdasarkan nama..."
+                       hx-get="{% url 'contacts:contact_search' %}"
+                       hx-trigger="input changed delay:300ms, search"
+                       hx-target="#contact-rows" hx-indicator="#search-indicator">
+                <span id="search-indicator" class="htmx-indicator" role="status">Mencari...</span>
+            </div>
+
+            <div class="contact-table-wrap">
+                <table class="contact-table">
+                    <caption class="contact-caption">Daftar nama, email, dan nomor telepon kontak</caption>
+                    <thead>
+                        <tr><th scope="col">Nama</th><th scope="col">Email</th><th scope="col">Nomor telepon</th><th scope="col">Aksi</th></tr>
+                    </thead>
+                    <tbody id="contact-rows">{% include 'contacts/_contact_rows.html' %}</tbody>
+                </table>
+                <p class="contact-empty">Tidak ada kontak.</p>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock content %}
