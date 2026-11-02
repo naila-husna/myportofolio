@@ -91,11 +91,15 @@
     {% include "components/message_form_modal.html" %}
 {% endif %}
 
+{% csrf_token %}
 <script>
     // Konfigurasi
-    const BASE_MESSAGES_ENDPOINT = "{% url 'main:get_messages_json' %}";
+    const BASE_MESSAGES_ENDPOINT = "{% url 'api:message-list' %}";
+    const DETAIL_MESSAGE_ENDPOINT = "{% url 'api:message-detail' 0 %}";
+    const STAR_MESSAGE_ENDPOINT = "{% url 'api:message-star' 0 %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     let messagesAbortController;
 
     // Elemen DOM
@@ -107,7 +111,6 @@
     const searchInput = document.getElementById('search-input');
     const SEARCH_DEBOUNCE_DELAY = 300;
     let searchDebounceTimer;
-    const CREATE_MESSAGE_ENDPOINT = "{% url 'main:create_message_ajax' %}";
     const messageForm = document.getElementById('message-form');
     const messageModal = document.getElementById('message-modal');
 
@@ -128,27 +131,30 @@
             .replaceAll("'", '&#39;');
     }
 
-    // Membuat elemen card project
-    function buildMessageCardElement(item) {
-        const message = item.fields;
-        const messageId = item.pk;
+    function getCookie(name) {
+        const prefix = `${name}=`;
+        const cookie = document.cookie.split(';').map(value => value.trim())
+            .find(value => value.startsWith(prefix));
+        return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : '';
+    }
 
+    function messageEndpoint(pattern, id) {
+        return pattern.replace('/0/', `/${encodeURIComponent(id)}/`);
+    }
+
+    // Membuat elemen card pesan
+    function buildMessageCardElement(message) {
+        const messageId = message.id;
         const articleElement = document.createElement('article');
         articleElement.className = 'message-card';
 
-        // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
-        const deleteUrl = "{% url 'main:delete_message' 0 %}".replace('/0/', `/${messageId}/`);
-
-        const starUrl = "{% url 'main:toggle_star' 0 %}".replace('/0/', `/${messageId}/`);
-        const editUrl = "{% url 'main:update_message' 0 %}".replace('/0/', `/${messageId}/`);
+        const editUrl = messageEndpoint("{% url 'main:update_message' 0 %}", messageId);
 
         const editHtml = IS_SUPERUSER || IS_EDITOR? `<a href="${editUrl}" class="button">Edit</a>` : '';
 
         const deleteHtml = IS_SUPERUSER
-            ? `<form method="post" action="${deleteUrl}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="button button-danger" onclick="return confirm('Yakin ingin menghapus message ini?');">Hapus</button>
-            </form>`
+            ? `<button type="button" class="button button-danger"
+                data-action="delete" data-id="${escapeHtml(messageId)}">Hapus</button>`
             : '';
 
         const isStarredClass = message.is_starred ? " is-starred" : "";
@@ -156,6 +162,18 @@
         const starTitle = message.star_count > 0
             ? `Dibintangi oleh ${message.starred_by_names}`
             : "Jadilah yang pertama memberi star";
+        const starHtml = IS_AUTHENTICATED
+            ? `<button type="button" class="button button-star${isStarredClass}"
+                    data-action="star" data-id="${escapeHtml(messageId)}"
+                    title="${escapeHtml(starTitle)}" aria-pressed="${message.is_starred}">
+                    <span aria-hidden="true">&#9733;</span>
+                    ${starText}
+                    <span class="star-count">${escapeHtml(message.star_count)}</span>
+               </button>`
+            : `<a href="{% url 'main:login' %}" class="button button-star">
+                    <span aria-hidden="true">&#9733;</span>
+                    Star <span class="star-count">${escapeHtml(message.star_count)}</span>
+               </a>`;
 
         // Komponen card
         const completeCardHtml = `
@@ -164,16 +182,7 @@
             <div class="message-card-actions">
                 <div class="message-actions">
                     
-                    <form method="post" action="${starUrl}" class="star-form">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="button button-star${isStarredClass}"
-                                title="${escapeHtml(starTitle)}">
-                            <span aria-hidden="true">★</span>
-                            ${starText}
-                            <span class="star-count">${escapeHtml(message.star_count)}</span>
-                        </button>
-                    </form>
+                    ${starHtml}
                     
                     ${editHtml}
                     ${deleteHtml}
@@ -185,7 +194,7 @@
         return articleElement;
     }
 
-    // Fetch data project
+    // Fetch data pesan
     async function fetchMessages(searchQuery = "") {
         if (messagesAbortController) messagesAbortController.abort();
         messagesAbortController = new AbortController();
@@ -203,13 +212,10 @@
 
             const messageData = await response.json();
 
+            gridContainer.replaceChildren(...messageData.map(buildMessageCardElement));
             if (messageData.length === 0) {
                 displayPageSection({ showEmpty: true });
             } else {
-                gridContainer.innerHTML = '';
-                messageData.forEach(item => {
-                    gridContainer.appendChild(buildMessageCardElement(item));
-                });
                 displayPageSection({ showGrid: true });
             }
         } catch (error) {
@@ -241,36 +247,49 @@
         }
     }
 
+    function apiErrorMessage(data, status) {
+        const messages = Object.values(data).flat().filter(value => typeof value === 'string');
+        return messages.join(' ') || `Permintaan gagal (HTTP ${status}).`;
+    }
+
+    async function writeMessage(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        return data;
+    }
+
     async function addMessage(event) {
         event.preventDefault();
         const submitButton = messageForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(CREATE_MESSAGE_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': messageForm.querySelector('[name="csrfmiddlewaretoken"]').value,
-                },
-                body: new FormData(messageForm),
-            });
-            const result = await response.json().catch(() => ({}));
-
-            if (response.ok) {
-                messageForm.reset();
-                closeMessageModal();
-                showToast('Berhasil', 'Pesan baru berhasil ditambahkan!', 'success');
-                clearTimeout(searchDebounceTimer);
-                searchMessages();
-            } else {
-                const errorMessages = result.errors
-                    ? Object.values(result.errors).flat().map(error => error.message)
-                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
-                showToast('Gagal menambahkan pesan', errorMessages.join(' '), 'error');
-            }
+            const fields = new FormData(messageForm);
+            const payload = {
+                name: fields.get('name'),
+                relationship: fields.get('relationship'),
+                message: fields.get('message'),
+                is_anonymous: fields.has('is_anonymous'),
+            };
+            await writeMessage(BASE_MESSAGES_ENDPOINT, 'POST', payload);
+            messageForm.reset();
+            closeMessageModal();
+            showToast('Berhasil', 'Pesan baru berhasil ditambahkan!', 'success');
+            clearTimeout(searchDebounceTimer);
+            await fetchMessages(searchInput.value.trim());
         } catch (error) {
             console.error('Error adding message:', error);
-            showToast('Gagal menambahkan pesan', 'Tidak dapat terhubung ke server. Silakan coba lagi.', 'error');
+            showToast('Gagal menambahkan pesan', error.message, 'error');
         } finally {
             submitButton.disabled = false;
         }
@@ -282,6 +301,27 @@
             messageModal.showPopover();
         }
     }
+
+    gridContainer.addEventListener('click', async function (event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button || button.disabled) return;
+        const action = button.dataset.action;
+        if (action !== 'star' && action !== 'delete') return;
+        if (action === 'delete' && !window.confirm('Yakin ingin menghapus message ini?')) return;
+        button.disabled = true;
+        try {
+            const pattern = action === 'star' ? STAR_MESSAGE_ENDPOINT : DETAIL_MESSAGE_ENDPOINT;
+            await writeMessage(messageEndpoint(pattern, button.dataset.id),
+                action === 'star' ? 'POST' : 'DELETE');
+            showToast('Berhasil', action === 'star' ? 'Star diperbarui.' : 'Pesan dihapus.', 'success');
+            clearTimeout(searchDebounceTimer);
+            await fetchMessages(searchInput.value.trim());
+        } catch (error) {
+            showToast('Permintaan gagal', error.message, 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
 
     // Start application
     fetchMessages(searchInput.value.trim());
