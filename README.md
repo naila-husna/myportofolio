@@ -188,3 +188,30 @@ Implementasi akhir, integrasi dengan project, penyesuaian terhadap model dan rol
 Log percakapan dengan AI disertakan sebagai dokumentasi penggunaan AI pada pengerjaan tugas ini.
 
 - AI Chat / Prompt Log: https://chatgpt.com/share/6ac37c84-3ec8-83ec-896f-961f003415f2
+
+### Tugas 6
+
+1. **REST dan PUT vs PATCH.** REST (Representational State Transfer) adalah gaya arsitektur untuk merancang web API, bukan library atau format data. Data diperlakukan sebagai *resource* yang ditunjuk URL (`/api/v1/messages/` dan `/api/v1/messages/<id>/`), HTTP method menyatakan tindakan (GET membaca, POST membuat, PUT/PATCH mengubah, DELETE menghapus), dan klien-server bertukar representasi data (JSON). Mengembalikan JSON saja belum cukup: endpoint seperti `/messages/add-ajax/` memang mengembalikan JSON, tetapi tindakan ditulis di URL dan semuanya lewat POST sehingga tidak memanfaatkan semantik HTTP. PUT mengirim representasi pengganti secara utuh (semua field wajib), cocok untuk form edit yang mengirim seluruh isian. PATCH hanya mengirim field yang berubah, cocok untuk mengubah satu field seperti `{"message": "..."}` tanpa menyentuh field lain.
+2. **Peran serializer.** Serializer menghubungkan objek model dan data JSON dua arah: serialization (objek menjadi data yang dapat dirender) dan deserialization (input divalidasi lalu disimpan). Dibanding merakit dictionary dengan `JsonResponse`, `MessageSerializer` mendefinisikan kontrak data di satu tempat (`fields` eksplisit, `read_only_fields`, field hitungan `star_count`/`is_starred`), validasi dan `strip_tags` ada di `validate_<field>`, error per field dikirim otomatis dengan status 400, dan `create`/`update` sudah tersedia. Kode view jadi lebih pendek, tidak berulang untuk tiap model, dan lebih kecil risiko membocorkan field sensitif.
+3. **Autentikasi vs otorisasi.** Autentikasi menjawab "siapa kamu": `SessionAuthentication` membaca session login dan mengisi `request.user`. Otorisasi menjawab "apa yang boleh kamu lakukan": permission class (`IsPortfolioOwnerOrEditorOrReadOnly`, `IsAuthenticated`) memutuskan apakah request diteruskan. Menyembunyikan tombol di template hanya mengatur tampilan; siapa pun tetap bisa mengirim request langsung lewat `fetch`, `curl`, atau Browsable API. Karena itu hak akses harus diperiksa di server.
+4. **CSRF dan SessionAuthentication.** Browser mengirim cookie session otomatis ke situs yang sama, termasuk saat request dipicu situs lain. Tanpa token CSRF, situs jahat bisa membuat browser korban yang sedang login mengirim POST/PATCH/DELETE ke API. Karena itu `SessionAuthentication` mewajibkan token CSRF (header `X-CSRFToken`) untuk method yang mengubah data. `force_authenticate` melewati proses login dan autentikasi session, sehingga CSRF tidak pernah diperiksa; test tersebut tetap lulus walau perlindungan CSRF rusak. Karena itu dipakai `APIClient(enforce_csrf_checks=True)` dengan `.login()` untuk membuktikan request tanpa token ditolak (403) dan dengan token berhasil.
+
+## AI Disclosure
+Saya menggunakan Gemini sebagai alat bantu untuk memahami requirement tugas, memperjelas konsep teknis, dan juga review dan konfirmasi terhadapat implementasi kode yang telah saya kerjakan
+
+**AI Tool**<br>
+Gemini
+
+**How I Used it**<br>
+Saya menggunakan AI sebagai pendamping belajar, penguji pemahaman (soundboard), dan reviewer keamanan. Strategi prompting yang saya gunakan adalah mengajukan pertanyaan konseptual, mengonfirmasi keputusan refactoring yang saya buat, menanyakan sintaks untuk README, serta mengevaluasi aspek keamanan tanpa meminta AI membuatkan keseluruhan proyek dari awal.
+
+Beberapa contoh penggunaan AI:
+- Penyesuaian URL routing dan primary key
+- Evaluasi keamanan (XSS dan atribute injection)
+- Review DOM API dan event delegation
+
+**Prompting Strategy**<br>
+Prompt yang saya berikan berfokus pada pengecekan logika, kode, dan meminta menjelaskan yang belum cukup jelas bagi saya
+
+### AI Chatlog
+https://share.gemini.google/ksX6wWNmgv7J 

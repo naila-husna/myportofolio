@@ -88,7 +88,7 @@
 </main>
 
 {% if user.is_superuser %}
-    {% include "components/message_form_modal.html" %}
+{% include "components/message_form_modal.html" %}
 {% endif %}
 
 {% csrf_token %}
@@ -101,6 +101,8 @@
     const IS_EDITOR = "{{ is_editor|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     let messagesAbortController;
+    let editingMessageId = null;
+    const messagesById = new Map();
 
     // Elemen DOM
     const loadingState = document.getElementById('loading');
@@ -113,6 +115,8 @@
     let searchDebounceTimer;
     const messageForm = document.getElementById('message-form');
     const messageModal = document.getElementById('message-modal');
+    const editForm = document.getElementById('edit-message-form');
+    const editModal = document.getElementById('edit-message-modal');
 
     // Menyembunyikan/Menampilkan section halaman
     function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
@@ -150,11 +154,10 @@
 
         const editUrl = messageEndpoint("{% url 'main:update_message' 0 %}", messageId);
 
-        const editHtml = IS_SUPERUSER || IS_EDITOR? `<a href="${editUrl}" class="button">Edit</a>` : '';
-
+        const editHtml = IS_SUPERUSER || IS_EDITOR ? `<button type="button" class="button" data-action="edit" data-id="${escapeHtml(messageId)}">Edit</button>` : '';
         const deleteHtml = IS_SUPERUSER
             ? `<button type="button" class="button button-danger"
-                data-action="delete" data-id="${escapeHtml(messageId)}">Hapus</button>`
+                data-action="delete" data-id="${escapeHtml(messageId)}">Delete</button>`
             : '';
 
         const isStarredClass = message.is_starred ? " is-starred" : "";
@@ -211,6 +214,9 @@
             if (!response.ok) throw new Error('Failed to fetch data');
 
             const messageData = await response.json();
+
+            messagesById.clear();
+            messageData.forEach(item => messagesById.set(String(item.id), item));
 
             gridContainer.replaceChildren(...messageData.map(buildMessageCardElement));
             if (messageData.length === 0) {
@@ -302,10 +308,57 @@
         }
     }
 
+    function openEditModal(id) {
+        const message = messagesById.get(String(id));
+        if (!message || !editModal) return;
+        editingMessageId = message.id;
+        editForm.elements.name.value = message.is_anonymous ? '' : message.name;
+        editForm.elements.name.placeholder = message.is_anonymous
+            ? 'Kosongkan untuk mempertahankan nama asli' : '';
+        editForm.elements.name.required = !message.is_anonymous;
+        editForm.elements.relationship.value = message.relationship;
+        editForm.elements.message.value = message.message;
+        editForm.elements.is_anonymous.checked = message.is_anonymous;
+        editModal.showPopover();
+    }
+
+    async function editMessage(event) {
+        event.preventDefault();
+        const submitButton = editForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        try {
+            const fields = new FormData(editForm);
+            const payload = {
+                relationship: fields.get('relationship'),
+                message: fields.get('message'),
+                is_anonymous: fields.has('is_anonymous'),
+            };
+            const name = fields.get('name').trim();
+            if (name) payload.name = name;
+            await writeMessage(messageEndpoint(DETAIL_MESSAGE_ENDPOINT, editingMessageId), 'PATCH', payload);
+            editModal.hidePopover();
+            showToast('Berhasil', 'Pesan berhasil diperbarui.', 'success');
+            clearTimeout(searchDebounceTimer);
+            await fetchMessages(searchInput.value.trim());
+        } catch (error) {
+            showToast('Gagal memperbarui pesan', error.message, 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (editForm) editForm.addEventListener('submit', editMessage);
+
     gridContainer.addEventListener('click', async function (event) {
         const button = event.target.closest('button[data-action]');
         if (!button || button.disabled) return;
         const action = button.dataset.action;
+
+        if (action === 'edit') {
+            openEditModal(button.dataset.id);
+            return;
+        }
+        
         if (action !== 'star' && action !== 'delete') return;
         if (action === 'delete' && !window.confirm('Yakin ingin menghapus message ini?')) return;
         button.disabled = true;

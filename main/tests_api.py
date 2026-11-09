@@ -251,3 +251,18 @@ class MessageAPITest(APITestCase):
         response = self.client.post(self.list_url, '{"name":', content_type="application/json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Message.objects.count(), 1)
+    
+    def test_homepage_edit_modal_only_for_owner_and_editor(self):
+        main_url = reverse("main:show_main")
+        for user, expected in ((None, False), (self.visitor, False), (self.editor, True), (self.owner, True)):
+            with self.subTest(user=getattr(user, "username", "guest")):
+                self.client.logout()
+                if user:
+                    self.client.force_login(user)
+                page = self.client.get(main_url)
+                self.assertEqual(page.status_code, 200)
+                if expected:
+                    self.assertContains(page, 'id="edit-message-form"')
+                else:
+                    self.assertNotContains(page, 'id="edit-message-form"')
+                self.assertNotContains(page, "item.fields")

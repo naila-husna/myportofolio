@@ -1,0 +1,27 @@
+<div id="edit-message-modal" class="message-form message-form-modal" popover="auto"
+    role="dialog" aria-modal="true" aria-labelledby="edit-message-title">
+    <button type="button" class="message-form-modal__close" popovertarget="edit-message-modal"
+        popovertargetaction="hide" aria-label="Tutup form">&times;</button>
+    <h2 id="edit-message-title">Edit pesan</h2>
+    <form id="edit-message-form">
+        <p>
+            <label for="edit-name">Nama</label>
+            <input type="text" id="edit-name" name="name" maxlength="100">
+        </p>
+        <p>
+            <label for="edit-relationship">Relationship</label>
+            <input type="text" id="edit-relationship" name="relationship" maxlength="100" required>
+        </p>
+        <p>
+            <label for="edit-message">Pesan</label>
+            <textarea id="edit-message" name="message" rows="4" required></textarea>
+        </p>
+        <p>
+            <label for="edit-is-anonymous">Tampilkan sebagai anonim</label>
+            <input type="checkbox" id="edit-is-anonymous" name="is_anonymous">
+        </p>
+        <button type="submit" class="button">Simpan Perubahan</button>
+        <button type="button" class="button button-secondary" popovertarget="edit-message-modal"
+            popovertargetaction="hide">Batal</button>
+    </form>
+</div>
