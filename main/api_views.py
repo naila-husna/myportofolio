@@ -7,9 +7,30 @@ from rest_framework.decorators import (
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from main.models import Message
-from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly
-from main.serializers import MessageSerializer
+from main.models import Message, Project
+from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly, IsPortfolioOwnerOrReadOnly
+from main.serializers import MessageSerializer, ProjectSerializer
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsPortfolioOwnerOrReadOnly])
+def project_list(request):
+    if request.method == "GET":
+        serializer = ProjectSerializer(Project.objects.order_by("title", "id"), many=True)
+        return Response(serializer.data)
+
+    serializer = ProjectSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    if request.auth is not None:
+        request.auth.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(["GET", "HEAD", "POST"])

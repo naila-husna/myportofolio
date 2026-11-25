@@ -35,6 +35,9 @@ CSRF_TRUSTED_ORIGINS = ["https://naila-husna-myportofolio.pws.cs.ui.ac.id"]
 
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
+if not PRODUCTION:
+    ALLOWED_HOSTS.append("10.0.2.2")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,9 +50,12 @@ INSTALLED_APPS = [
     'main',
     'contacts',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -61,6 +67,17 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'portofolio.urls'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+CORS_ALLOW_ALL_ORIGINS = os.getenv(
+    'CORS_ALLOW_ALL_ORIGINS', str(not PRODUCTION)
+).lower() == 'true'
 
 TEMPLATES = [
     {

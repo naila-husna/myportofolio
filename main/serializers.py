@@ -1,7 +1,17 @@
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
-from main.models import Message
+from main.models import Message, Project
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = [
+            "id", "title", "description", "tech_stack", "project_url",
+            "project_image_url",
+        ]
+        read_only_fields = ["id"]
 
 class MessageSerializer(serializers.ModelSerializer):
     star_count = serializers.SerializerMethodField()
